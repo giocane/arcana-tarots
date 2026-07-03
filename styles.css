@@ -19,7 +19,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; background: var(--cream); }
 body {
     font-family: var(--font-body);
     background: var(--cream);
@@ -306,7 +306,7 @@ img { max-width: 100%; display: block; }
 /* ============================================================
    FOOTER
    ============================================================ */
-.footer { background: var(--orange); }
+.footer { background: var(--orange); padding-bottom: env(safe-area-inset-bottom); }
 
 .footer-inner {
     max-width: 1100px; margin: 0 auto;
