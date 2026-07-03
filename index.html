@@ -43,8 +43,7 @@
         <a href="#detail-hasbeen" class="btn btn-orange">PRE ORDER HERE</a>
     </div>
     <div class="hero-media">
-        <!-- Remplacer par <img src="images/hasbeen-hero.jpg" alt="Has Been Tarot"> -->
-        <div class="hero-placeholder">✺</div>
+        <video src="videos/hasbeen-hero.mp4" autoplay muted loop playsinline></video>
     </div>
 </section>
 
@@ -56,8 +55,7 @@
         <a href="#detail-lenormand" class="btn btn-orange">PRE ORDER HERE</a>
     </div>
     <div class="hero-media">
-        <!-- Remplacer par <img src="images/lenormand-hero.jpg" alt="Too Much Lenormand"> -->
-        <div class="hero-placeholder">❉</div>
+        <video src="videos/lenormand-hero.mp4" autoplay muted loop playsinline></video>
     </div>
 </section>
 
@@ -69,8 +67,7 @@
         <a href="#detail-toomuch" class="btn btn-orange">PRE ORDER HERE</a>
     </div>
     <div class="hero-media">
-        <!-- Remplacer par <video src="videos/toomuch.mp4" autoplay muted loop playsinline></video> -->
-        <div class="hero-placeholder">✶</div>
+        <video src="videos/toomuch-hero.mp4" autoplay muted loop playsinline></video>
     </div>
 </section>
 
@@ -81,39 +78,72 @@
         <div class="products-grid">
 
             <div class="prod-card">
-                <p class="prod-card-name">TOO MUCH TAROT</p>
-                <div class="prod-card-media">
-                    <!-- <img src="images/toomuch-card.jpg" alt="Too Much Tarot"> -->
-                    ✶
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">TOO MUCH TAROT</p>
+
+                    <span class="prod-card-price">49 €</span>
+
                 </div>
-                <button class="btn btn-magenta sm" onclick="addToCartById(3)">AJOUTER AU PANIER</button>
+                <div class="prod-card-media">
+                    <img src="images/toomuch-card.jpg" alt="Too Much Tarot">
+                </div>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(3)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(3)">EN SAVOIR +</button>
+                </div>
             </div>
 
             <div class="prod-card">
-                <p class="prod-card-name">HAS BEEN TAROT</p>
-                <div class="prod-card-media">
-                    <!-- <img src="images/hasbeen-card.jpg" alt="Has Been Tarot"> -->
-                    ✺
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">HAS BEEN TAROT</p>
+
+                    <span class="prod-card-price">49 €</span>
+
                 </div>
-                <button class="btn btn-magenta sm" onclick="addToCartById(1)">AJOUTER AU PANIER</button>
+                <div class="prod-card-media">
+                    <img src="images/hasbeen-card.jpg" alt="Has Been Tarot">
+                </div>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(1)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(1)">EN SAVOIR +</button>
+                </div>
             </div>
 
             <div class="prod-card">
-                <p class="prod-card-name">TOO MUCH LENORMAND</p>
-                <div class="prod-card-media">
-                    <!-- <img src="images/lenormand-card.jpg" alt="Too Much Lenormand"> -->
-                    ❉
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">TOO MUCH LENORMAND</p>
+
+                    <span class="prod-card-price">49 €</span>
+
                 </div>
-                <button class="btn btn-magenta sm" onclick="addToCartById(2)">AJOUTER AU PANIER</button>
+                <div class="prod-card-media">
+                    <img src="images/lenormand-card.jpg" alt="Too Much Lenormand">
+                </div>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(2)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(2)">EN SAVOIR +</button>
+                </div>
             </div>
 
             <div class="prod-card">
-                <p class="prod-card-name">BUNDLE</p>
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">BUNDLE</p>
+
+                    <span class="prod-card-price">49 €</span>
+
+                </div>
                 <div class="prod-card-media">
                     <!-- <img src="images/bundle-card.jpg" alt="Bundle"> -->
                     ✦
                 </div>
-                <button class="btn btn-magenta sm" onclick="addToCartById(4)">AJOUTER AU PANIER</button>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(4)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(4)">EN SAVOIR +</button>
+                </div>
             </div>
 
         </div>
@@ -127,39 +157,122 @@
         <div class="products-grid">
 
             <div class="prod-card">
-                <p class="prod-card-name">BOUGIE MARTINI</p>
-                <div class="prod-card-media">
-                    <!-- <img src="images/bougie-martini.jpg" alt="Bougie Martini"> -->
-                    ✿
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">BOUGIE MARTINI</p>
+
+                    <span class="prod-card-price">49 €</span>
+
                 </div>
-                <button class="btn btn-magenta sm" onclick="addToCartById(5)">AJOUTER AU PANIER</button>
+                <div class="prod-card-media">
+                    <img src="images/Bougies/bougie-martini.jpg" alt="Bougie Martini">
+                </div>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(5)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(5)">EN SAVOIR +</button>
+                </div>
             </div>
 
             <div class="prod-card">
-                <p class="prod-card-name">BOUGIE MATCHA LATTE</p>
-                <div class="prod-card-media">
-                    <!-- <img src="images/bougie-matcha.jpg" alt="Bougie Matcha Latte"> -->
-                    ✿
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">BOUGIE MATCHA LATTE</p>
+
+                    <span class="prod-card-price">49 €</span>
+
                 </div>
-                <button class="btn btn-magenta sm" onclick="addToCartById(6)">AJOUTER AU PANIER</button>
+                <div class="prod-card-media">
+                    <img src="images/Bougies/bougie-matcha.jpg" alt="Bougie Matcha Latte">
+                </div>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(6)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(6)">EN SAVOIR +</button>
+                </div>
             </div>
 
             <div class="prod-card">
-                <p class="prod-card-name">BOUGIE UBE LATTE</p>
-                <div class="prod-card-media">
-                    <!-- <img src="images/bougie-ube.jpg" alt="Bougie Ube Latte"> -->
-                    ✿
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">BOUGIE UBE LATTE</p>
+
+                    <span class="prod-card-price">49 €</span>
+
                 </div>
-                <button class="btn btn-magenta sm" onclick="addToCartById(7)">AJOUTER AU PANIER</button>
+                <div class="prod-card-media">
+                    <img src="images/Bougies/bougie-ube.jpg" alt="Bougie Ube Latte">
+                </div>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(7)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(7)">EN SAVOIR +</button>
+                </div>
             </div>
 
             <div class="prod-card">
-                <p class="prod-card-name">BOUGIE TOMATE</p>
-                <div class="prod-card-media">
-                    <!-- <img src="images/bougie-tomate.jpg" alt="Bougie Tomate"> -->
-                    ✿
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">BOUGIE TOMATE</p>
+
+                    <span class="prod-card-price">49 €</span>
+
                 </div>
-                <button class="btn btn-magenta sm" onclick="addToCartById(8)">AJOUTER AU PANIER</button>
+                <div class="prod-card-media">
+                    <img src="images/Bougies/bougie-tomate.jpg" alt="Bougie Tomate">
+                </div>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(8)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(8)">EN SAVOIR +</button>
+                </div>
+            </div>
+
+            <div class="prod-card">
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">BOUGIE ORANGE</p>
+
+                    <span class="prod-card-price">49 €</span>
+
+                </div>
+                <div class="prod-card-media">
+                    <img src="images/Bougies/bougie-orange.jpg" alt="Bougie Orange">
+                </div>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(9)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(9)">EN SAVOIR +</button>
+                </div>
+            </div>
+
+            <div class="prod-card">
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">BOUGIE CITRON</p>
+
+                    <span class="prod-card-price">49 €</span>
+
+                </div>
+                <div class="prod-card-media">
+                    <img src="images/Bougies/bougie-citron.jpg" alt="Bougie Citron">
+                </div>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(10)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(10)">EN SAVOIR +</button>
+                </div>
+            </div>
+
+            <div class="prod-card">
+                <div class="prod-card-head">
+
+                    <p class="prod-card-name">BOUGIE FRAISE</p>
+
+                    <span class="prod-card-price">49 €</span>
+
+                </div>
+                <div class="prod-card-media">
+                    <img src="images/Bougies/bougie-fraise.jpg" alt="Bougie Fraise">
+                </div>
+                <div class="prod-card-actions">
+                    <button class="btn btn-magenta sm" onclick="addToCartById(11)">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(11)">EN SAVOIR +</button>
+                </div>
             </div>
 
         </div>
@@ -179,8 +292,7 @@
         <button class="btn btn-magenta" onclick="addToCartById(2)">AJOUTER AU PANIER</button>
     </div>
     <div class="detail-media">
-        <!-- <video src="videos/lenormand-detail.mp4" autoplay muted loop playsinline></video> -->
-        ❉
+        <video src="videos/lenormand-detail.mp4" autoplay muted loop playsinline></video>
     </div>
 </section>
 
@@ -197,8 +309,7 @@
         <button class="btn btn-magenta" onclick="addToCartById(3)">AJOUTER AU PANIER</button>
     </div>
     <div class="detail-media">
-        <!-- <video src="videos/toomuch-detail.mp4" autoplay muted loop playsinline></video> -->
-        ✶
+        <video src="videos/toomuch-detail.mp4" autoplay muted loop playsinline></video>
     </div>
 </section>
 
@@ -215,8 +326,7 @@
         <button class="btn btn-magenta" onclick="addToCartById(1)">AJOUTER AU PANIER</button>
     </div>
     <div class="detail-media">
-        <!-- <video src="videos/hasbeen-detail.mp4" autoplay muted loop playsinline></video> -->
-        ✺
+        <img src="images/hasbeen-detail.jpg" alt="Has Been Tarot">
     </div>
 </section>
 
@@ -242,6 +352,20 @@
         </div>
     </div>
 </footer>
+
+<!-- MODALE PRODUIT -->
+<div class="modal-overlay" id="productModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-panel">
+        <button class="modal-close" id="modalClose" aria-label="Fermer">&times;</button>
+        <div class="modal-media" id="modalMedia"></div>
+        <div class="modal-body">
+            <p class="modal-tag" id="modalTag"></p>
+            <h3 class="modal-title" id="modalTitle"></h3>
+            <p class="modal-specs" id="modalSpecs"></p>
+            <button class="btn btn-magenta" id="modalAddBtn">AJOUTER AU PANIER</button>
+        </div>
+    </div>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -275,7 +399,7 @@ let toastTimer;
 function addToCartById(id) {
     const p = window.PRODUCTS.find(x => x.id === id);
     if (!p) return;
-    window.ArcanaCart.add({ id: p.id, name: p.name, price: p.price, glyph: p.glyph, grad: p.grad, meta: p.tag });
+    window.ArcanaCart.add({ id: p.id, name: p.name, price: p.price, glyph: p.glyph, grad: p.grad, img: p.img, meta: p.tag });
     document.querySelectorAll('.nav-badge').forEach(b =>
         b.animate([{ transform: 'scale(1.6)' }, { transform: 'scale(1)' }], { duration: 300 })
     );
@@ -284,6 +408,45 @@ function addToCartById(id) {
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
 }
+
+// Modale produit "En savoir +"
+const productModal = document.getElementById('productModal');
+const modalMedia = document.getElementById('modalMedia');
+const modalTag = document.getElementById('modalTag');
+const modalTitle = document.getElementById('modalTitle');
+const modalSpecs = document.getElementById('modalSpecs');
+const modalAddBtn = document.getElementById('modalAddBtn');
+const modalClose = document.getElementById('modalClose');
+
+function openProductModal(id) {
+    const p = window.PRODUCTS.find(x => x.id === id);
+    if (!p) return;
+
+    modalMedia.innerHTML = p.img
+        ? `<img src="${p.img}" alt="${p.name}">`
+        : p.glyph;
+    modalTag.textContent = p.tag;
+    modalTitle.textContent = p.name;
+
+    const specs = [
+        p.cards    ? `${p.cards} cartes` : null,
+        p.format   || null,
+        p.weight   || null,
+        p.delivery || null,
+    ].filter(Boolean);
+    modalSpecs.textContent = specs.length ? specs.join(' — ') : 'Description à venir.';
+
+    modalAddBtn.onclick = () => { addToCartById(id); closeProductModal(); };
+    productModal.classList.add('show');
+}
+
+function closeProductModal() {
+    productModal.classList.remove('show');
+}
+
+modalClose.addEventListener('click', closeProductModal);
+productModal.addEventListener('click', e => { if (e.target === productModal) closeProductModal(); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape') closeProductModal(); });
 
 // Révélation au scroll
 const io = new IntersectionObserver(entries => {

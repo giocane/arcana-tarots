@@ -21,7 +21,7 @@ function render() {
         <div class="cart-lines">
             ${items.map(it => `
                 <div class="cart-line" data-key="${it.key}">
-                    <div class="cart-thumb">${it.glyph}</div>
+                    <div class="cart-thumb">${it.img ? `<img src="${it.img}" alt="${it.name}">` : it.glyph}</div>
                     <div>
                         <div class="cart-name">${it.name}</div>
                         ${it.meta ? `<div class="cart-meta">${it.meta}</div>` : ''}

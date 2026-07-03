@@ -12,7 +12,7 @@
         const key = item.key || ('p' + item.id);
         const found = c.find(x => x.key === key);
         if (found) found.qty += item.qty || 1;
-        else c.push({ key, id: item.id ?? null, name: item.name, price: item.price || 0, glyph: item.glyph || '✦', grad: item.grad || 'g-toomuch', meta: item.meta || '', qty: item.qty || 1 });
+        else c.push({ key, id: item.id ?? null, name: item.name, price: item.price || 0, glyph: item.glyph || '✦', grad: item.grad || 'g-toomuch', img: item.img || null, meta: item.meta || '', qty: item.qty || 1 });
         save(c);
         return count();
     }

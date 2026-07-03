@@ -1,2 +1,7 @@
 .DS_Store
 *.zip
+
+# Rushes bruts (photos/vidéos sources non utilisées par le site)
+images/Has Been Tarot/
+images/Too Much Lenormand/
+images/Too Much Tarot/
