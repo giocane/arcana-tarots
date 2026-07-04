@@ -30,15 +30,16 @@
 
 <header class="nav" id="nav">
     <div class="nav-inner">
-        <a href="index.html" class="nav-logo">TAROTLENS</a>
+        <button class="lang-toggle" id="langToggle" type="button"></button>
+        <a href="index.html" class="nav-logo" data-i18n-attr="aria-label:nav_homeAria">TAROTLENS</a>
         <div class="nav-row">
             <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
             <nav class="nav-links" id="navLinks">
-                <a href="index.html#decks">LES DECKS</a>
-                <a href="index.html#accessoires">ACCESSOIRES</a>
+                <a href="index.html#decks" data-i18n="nav_decks">LES DECKS</a>
+                <a href="index.html#accessoires" data-i18n="nav_accessories">ACCESSOIRES</a>
                 <a href="contact.html" class="active">CONTACT</a>
             </nav>
-            <button class="nav-icon" aria-label="Panier">
+            <button class="nav-icon" data-i18n-attr="aria-label:nav_cartAria">
                 <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" d="M6 8h12l-1 12H7L6 8Zm3 0a3 3 0 0 1 6 0"/></svg>
                 <span class="nav-badge">0</span>
             </button>
@@ -52,7 +53,7 @@
         <div class="contact-grid">
             <form class="contact-form" onsubmit="event.preventDefault(); this.reset(); document.getElementById('sent').hidden=false;">
                 <div class="form-group">
-                    <label for="fn">Prénom & Nom</label>
+                    <label for="fn" data-i18n="contact_nameLabel">Prénom & Nom</label>
                     <input id="fn" class="field" required />
                 </div>
                 <div class="form-group">
@@ -60,20 +61,20 @@
                     <input id="em" type="email" class="field" required />
                 </div>
                 <div class="form-group">
-                    <label for="su">Sujet</label>
+                    <label for="su" data-i18n="contact_subjectLabel">Sujet</label>
                     <select id="su" class="field">
-                        <option>Question sur une commande</option>
-                        <option>Pré-commande</option>
-                        <option>Partenariat / presse</option>
-                        <option>Autre</option>
+                        <option data-i18n="contact_opt1">Question sur une commande</option>
+                        <option data-i18n="contact_opt2">Pré-commande</option>
+                        <option data-i18n="contact_opt3">Partenariat / presse</option>
+                        <option data-i18n="contact_opt4">Autre</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="msg">Message</label>
                     <textarea id="msg" class="field" required></textarea>
                 </div>
-                <button class="btn btn-orange" type="submit">ENVOYER</button>
-                <p id="sent" hidden class="sent-msg">✦ Message envoyé, merci !</p>
+                <button class="btn btn-orange" type="submit" data-i18n="contact_send">ENVOYER</button>
+                <p id="sent" hidden class="sent-msg" data-i18n="contact_sentMsg">✦ Message envoyé, merci !</p>
             </form>
 
             <aside class="contact-aside">
@@ -86,8 +87,8 @@
                     <a href="mailto:TarotLens129@gmail.com">TarotLens129@gmail.com</a>
                 </div>
                 <div>
-                    <h3>Réponse</h3>
-                    <p>Je réponds sous 48 h.</p>
+                    <h3 data-i18n="contact_responseTitle">Réponse</h3>
+                    <p data-i18n="contact_responseText">Je réponds sous 48 h.</p>
                 </div>
             </aside>
         </div>
@@ -98,7 +99,7 @@
     <div class="footer-inner">
         <div class="footer-holo"></div>
         <div class="footer-info">
-            <p>Me contacter si vous avez des questions</p>
+            <p data-i18n="footer_contactLine">Me contacter si vous avez des questions</p>
             <div class="footer-contacts">
                 <a href="https://instagram.com/TarotLens">@TarotLens (Instagram)</a>
                 <a href="mailto:TarotLens129@gmail.com">TarotLens129@gmail.com</a>
@@ -106,12 +107,13 @@
         </div>
         <p class="footer-bye">SEE YOU THERE!</p>
         <div class="footer-legal-row">
-            <a href="legal.html">Mentions légales</a>
+            <a href="legal.html" data-i18n="footer_legalLink">Mentions légales</a>
             <span>© 2026 TarotLens</span>
         </div>
     </div>
 </footer>
 
+<script src="i18n.js?v=1"></script>
 <script src="cart.js?v=2"></script>
 <script>
 const burger = document.getElementById('navBurger');

@@ -15,17 +15,18 @@
 <!-- ═══════════════════════════════════ NAV ═══════════════════════════════════ -->
 <header class="nav" id="nav">
     <div class="nav-inner">
-        <a href="index.html" class="nav-logo" aria-label="TarotLens, accueil">TAROTLENS</a>
+        <button class="lang-toggle" id="langToggle" type="button"></button>
+        <a href="index.html" class="nav-logo" data-i18n-attr="aria-label:nav_homeAria">TAROTLENS</a>
         <div class="nav-row">
             <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false">
                 <span></span><span></span>
             </button>
             <nav class="nav-links" id="navLinks" aria-label="Navigation principale">
-                <a href="#decks">LES DECKS</a>
-                <a href="#accessoires">ACCESSOIRES</a>
+                <a href="#decks" data-i18n="nav_decks">LES DECKS</a>
+                <a href="#accessoires" data-i18n="nav_accessories">ACCESSOIRES</a>
                 <a href="contact.html">CONTACT</a>
             </nav>
-            <button class="nav-icon" aria-label="Panier">
+            <button class="nav-icon" data-i18n-attr="aria-label:nav_cartAria">
                 <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" d="M6 8h12l-1 12H7L6 8Zm3 0a3 3 0 0 1 6 0"/></svg>
                 <span class="nav-badge">0</span>
             </button>
@@ -39,8 +40,7 @@
 <section class="hero-feature">
     <div class="hero-copy">
         <h1 class="hero-title">NEW<br>HAS BEEN<br>TAROT</h1>
-        <p class="hero-sub">87 Cartes pleine de nostalgie</p>
-        <a href="#detail-hasbeen" class="btn btn-orange">PRE ORDER HERE</a>
+        <a href="#decks" class="btn btn-orange" data-i18n="hero_cta">PRE ORDER HERE</a>
     </div>
     <div class="hero-media">
         <video src="videos/hasbeen-hero.mp4" autoplay muted loop playsinline></video>
@@ -51,8 +51,7 @@
 <section class="hero-feature">
     <div class="hero-copy">
         <h2 class="hero-title magenta">NEW<br>TOO MUCH<br>LENORMAND</h2>
-        <p class="hero-sub">46 Cartes, toujours plus kitsh</p>
-        <a href="#detail-lenormand" class="btn btn-orange">PRE ORDER HERE</a>
+        <a href="#decks" class="btn btn-orange" data-i18n="hero_cta">PRE ORDER HERE</a>
     </div>
     <div class="hero-media">
         <video src="videos/lenormand-hero.mp4" autoplay muted loop playsinline></video>
@@ -63,8 +62,7 @@
 <section class="hero-feature rev">
     <div class="hero-copy">
         <h2 class="hero-title">TOO MUCH<br>TAROT</h2>
-        <p class="hero-sub">If it's too much, add more !</p>
-        <a href="#detail-toomuch" class="btn btn-orange">PRE ORDER HERE</a>
+        <a href="#decks" class="btn btn-orange" data-i18n="hero_cta">PRE ORDER HERE</a>
     </div>
     <div class="hero-media">
         <video src="videos/toomuch-hero.mp4" autoplay muted loop playsinline></video>
@@ -74,7 +72,7 @@
 <!-- ═══════════════════════════════════ LES DECKS ════════════════════════════════ -->
 <section class="products-section" id="decks">
     <div class="products-section-inner">
-        <h2 class="section-title">LES DECKS</h2>
+        <h2 class="section-title" data-i18n="title_decks">LES DECKS</h2>
         <div class="products-grid">
 
             <div class="prod-card">
@@ -82,15 +80,15 @@
 
                     <p class="prod-card-name">TOO MUCH TAROT</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">58 €</span>
 
                 </div>
                 <div class="prod-card-media">
                     <img src="images/toomuch-card.jpg" alt="Too Much Tarot">
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(3)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(3)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(3)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(3)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
@@ -99,15 +97,15 @@
 
                     <p class="prod-card-name">HAS BEEN TAROT</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">59 €</span>
 
                 </div>
                 <div class="prod-card-media">
                     <img src="images/hasbeen-card.jpg" alt="Has Been Tarot">
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(1)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(1)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(1)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(1)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
@@ -116,15 +114,15 @@
 
                     <p class="prod-card-name">TOO MUCH LENORMAND</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">37 €</span>
 
                 </div>
                 <div class="prod-card-media">
                     <img src="images/lenormand-card.jpg" alt="Too Much Lenormand">
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(2)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(2)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(2)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(2)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
@@ -133,7 +131,7 @@
 
                     <p class="prod-card-name">BUNDLE</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">88 €</span>
 
                 </div>
                 <div class="prod-card-media">
@@ -141,8 +139,8 @@
                     ✦
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(4)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(4)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(4)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(4)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
@@ -153,180 +151,129 @@
 <!-- ═══════════════════════════════ LES ACCESSOIRES ══════════════════════════════ -->
 <section class="products-section" id="accessoires">
     <div class="products-section-inner">
-        <h2 class="section-title">LES ACCESSOIRES</h2>
+        <h2 class="section-title" data-i18n="title_accessories">LES ACCESSOIRES</h2>
         <div class="products-grid">
 
             <div class="prod-card">
                 <div class="prod-card-head">
 
-                    <p class="prod-card-name">BOUGIE MARTINI</p>
+                    <p class="prod-card-name" data-i18n="p5_name">BOUGIE MARTINI</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">29 €</span>
 
                 </div>
                 <div class="prod-card-media">
                     <img src="images/Bougies/bougie-martini.jpg" alt="Bougie Martini">
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(5)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(5)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(5)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(5)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
             <div class="prod-card">
                 <div class="prod-card-head">
 
-                    <p class="prod-card-name">BOUGIE MATCHA LATTE</p>
+                    <p class="prod-card-name" data-i18n="p6_name">BOUGIE MATCHA LATTE</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">29 €</span>
 
                 </div>
                 <div class="prod-card-media">
                     <img src="images/Bougies/bougie-matcha.jpg" alt="Bougie Matcha Latte">
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(6)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(6)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(6)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(6)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
             <div class="prod-card">
                 <div class="prod-card-head">
 
-                    <p class="prod-card-name">BOUGIE UBE LATTE</p>
+                    <p class="prod-card-name" data-i18n="p7_name">BOUGIE UBE LATTE</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">29 €</span>
 
                 </div>
                 <div class="prod-card-media">
                     <img src="images/Bougies/bougie-ube.jpg" alt="Bougie Ube Latte">
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(7)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(7)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(7)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(7)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
             <div class="prod-card">
                 <div class="prod-card-head">
 
-                    <p class="prod-card-name">BOUGIE TOMATE</p>
+                    <p class="prod-card-name" data-i18n="p8_name">BOUGIE TOMATE</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">13 €</span>
 
                 </div>
                 <div class="prod-card-media">
                     <img src="images/Bougies/bougie-tomate.jpg" alt="Bougie Tomate">
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(8)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(8)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(8)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(8)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
             <div class="prod-card">
                 <div class="prod-card-head">
 
-                    <p class="prod-card-name">BOUGIE ORANGE</p>
+                    <p class="prod-card-name" data-i18n="p9_name">BOUGIE ORANGE</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">13 €</span>
 
                 </div>
                 <div class="prod-card-media">
                     <img src="images/Bougies/bougie-orange.jpg" alt="Bougie Orange">
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(9)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(9)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(9)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(9)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
             <div class="prod-card">
                 <div class="prod-card-head">
 
-                    <p class="prod-card-name">BOUGIE CITRON</p>
+                    <p class="prod-card-name" data-i18n="p10_name">BOUGIE CITRON</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">13 €</span>
 
                 </div>
                 <div class="prod-card-media">
                     <img src="images/Bougies/bougie-citron.jpg" alt="Bougie Citron">
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(10)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(10)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(10)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(10)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
             <div class="prod-card">
                 <div class="prod-card-head">
 
-                    <p class="prod-card-name">BOUGIE FRAISE</p>
+                    <p class="prod-card-name" data-i18n="p11_name">BOUGIE FRAISE</p>
 
-                    <span class="prod-card-price">49 €</span>
+                    <span class="prod-card-price">12 €</span>
 
                 </div>
                 <div class="prod-card-media">
                     <img src="images/Bougies/bougie-fraise.jpg" alt="Bougie Fraise">
                 </div>
                 <div class="prod-card-actions">
-                    <button class="btn btn-magenta sm" onclick="addToCartById(11)">AJOUTER AU PANIER</button>
-                    <button class="btn btn-ghost sm" onclick="openProductModal(11)">EN SAVOIR +</button>
+                    <button class="btn btn-magenta sm" onclick="addToCartById(11)" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
+                    <button class="btn btn-ghost sm" onclick="openProductModal(11)" data-i18n="btn_learnMore">EN SAVOIR +</button>
                 </div>
             </div>
 
         </div>
-    </div>
-</section>
-
-<!-- ══════════════════════════ DÉTAIL — TOO MUCH LENORMAND ═══════════════════════ -->
-<section class="detail-section" id="detail-lenormand">
-    <div class="detail-copy">
-        <h2 class="detail-title">TOO MUCH<br>LENORMAND</h2>
-        <p class="detail-specs">
-            46 Cartes<br>
-            Format Poker 63×89mm<br>
-            310g finition Soft Touch<br>
-            Jeu livré dans pochon, accompagné de ces goodies
-        </p>
-        <button class="btn btn-magenta" onclick="addToCartById(2)">AJOUTER AU PANIER</button>
-    </div>
-    <div class="detail-media">
-        <video src="videos/lenormand-detail.mp4" autoplay muted loop playsinline></video>
-    </div>
-</section>
-
-<!-- ═══════════════════════════ DÉTAIL — TOO MUCH TAROT ══════════════════════════ -->
-<section class="detail-section rev" id="detail-toomuch">
-    <div class="detail-copy">
-        <h2 class="detail-title">TOO MUCH<br>TAROT</h2>
-        <p class="detail-specs">
-            82 Cartes<br>
-            Format Standard 70×120mm<br>
-            350g finition Soft Touch<br>
-            Jeu livré dans un bandana ou pochon, accompagné de ces goodies
-        </p>
-        <button class="btn btn-magenta" onclick="addToCartById(3)">AJOUTER AU PANIER</button>
-    </div>
-    <div class="detail-media">
-        <video src="videos/toomuch-detail.mp4" autoplay muted loop playsinline></video>
-    </div>
-</section>
-
-<!-- ═══════════════════════════ DÉTAIL — HAS BEEN TAROT ══════════════════════════ -->
-<section class="detail-section" id="detail-hasbeen">
-    <div class="detail-copy">
-        <h2 class="detail-title">HAS BEEN<br>TAROT</h2>
-        <p class="detail-specs">
-            87 Cartes<br>
-            Format Poker 63×89mm<br>
-            310g finition Soft Touch<br>
-            Jeu livré dans pochon, accompagné de ces goodies
-        </p>
-        <button class="btn btn-magenta" onclick="addToCartById(1)">AJOUTER AU PANIER</button>
-    </div>
-    <div class="detail-media">
-        <img src="images/hasbeen-detail.jpg" alt="Has Been Tarot">
     </div>
 </section>
 
@@ -336,10 +283,10 @@
 <footer class="footer">
     <div class="footer-inner">
         <div class="footer-holo">
-            <!-- <img src="images/holographic.jpg" alt=""> -->
+            <img src="images/footer-bloc.jpg" alt="">
         </div>
         <div class="footer-info">
-            <p>Me contacter si vous avez des questions</p>
+            <p data-i18n="footer_contactLine">Me contacter si vous avez des questions</p>
             <div class="footer-contacts">
                 <a href="https://instagram.com/TarotLens">@TarotLens (Instagram)</a>
                 <a href="mailto:TarotLens129@gmail.com">TarotLens129@gmail.com</a>
@@ -347,7 +294,7 @@
         </div>
         <p class="footer-bye">SEE YOU THERE!</p>
         <div class="footer-legal-row">
-            <a href="legal.html">Mentions légales</a>
+            <a href="legal.html" data-i18n="footer_legalLink">Mentions légales</a>
             <span>© 2026 TarotLens</span>
         </div>
     </div>
@@ -356,13 +303,14 @@
 <!-- MODALE PRODUIT -->
 <div class="modal-overlay" id="productModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-panel">
-        <button class="modal-close" id="modalClose" aria-label="Fermer">&times;</button>
+        <button class="modal-close" id="modalClose" data-i18n-attr="aria-label:modal_closeAria">&times;</button>
         <div class="modal-media" id="modalMedia"></div>
         <div class="modal-body">
             <p class="modal-tag" id="modalTag"></p>
             <h3 class="modal-title" id="modalTitle"></h3>
+            <p class="modal-desc" id="modalDesc"></p>
             <p class="modal-specs" id="modalSpecs"></p>
-            <button class="btn btn-magenta" id="modalAddBtn">AJOUTER AU PANIER</button>
+            <button class="btn btn-magenta" id="modalAddBtn" data-i18n="btn_addToCart">AJOUTER AU PANIER</button>
         </div>
     </div>
 </div>
@@ -370,6 +318,7 @@
 <!-- TOAST -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="i18n.js?v=1"></script>
 <script src="data.js?v=2"></script>
 <script src="cart.js?v=2"></script>
 <script>
@@ -399,11 +348,13 @@ let toastTimer;
 function addToCartById(id) {
     const p = window.PRODUCTS.find(x => x.id === id);
     if (!p) return;
-    window.ArcanaCart.add({ id: p.id, name: p.name, price: p.price, glyph: p.glyph, grad: p.grad, img: p.img, meta: p.tag });
+    const { pick, t } = window.TarotLensI18n;
+    const displayName = pick(p, 'name');
+    window.ArcanaCart.add({ id: p.id, name: displayName, price: p.price, glyph: p.glyph, grad: p.grad, img: p.img, meta: pick(p, 'tag') });
     document.querySelectorAll('.nav-badge').forEach(b =>
         b.animate([{ transform: 'scale(1.6)' }, { transform: 'scale(1)' }], { duration: 300 })
     );
-    toast.textContent = `« ${p.name} » ajouté au panier`;
+    toast.textContent = t('toast_added').replace('{name}', displayName);
     toast.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
@@ -414,27 +365,71 @@ const productModal = document.getElementById('productModal');
 const modalMedia = document.getElementById('modalMedia');
 const modalTag = document.getElementById('modalTag');
 const modalTitle = document.getElementById('modalTitle');
+const modalDesc = document.getElementById('modalDesc');
 const modalSpecs = document.getElementById('modalSpecs');
 const modalAddBtn = document.getElementById('modalAddBtn');
 const modalClose = document.getElementById('modalClose');
 
+let modalImages = [];
+let modalImageIndex = 0;
+
+function renderModalSlide() {
+    modalMedia.querySelectorAll('.modal-slide').forEach((img, i) => img.classList.toggle('active', i === modalImageIndex));
+    modalMedia.querySelectorAll('.modal-dot').forEach((d, i) => d.classList.toggle('active', i === modalImageIndex));
+}
+
+function buildModalMedia(p, displayName) {
+    const images = (p.images && p.images.length ? p.images : (p.img ? [p.img] : []));
+    modalImages = images;
+    modalImageIndex = 0;
+
+    if (!images.length) {
+        modalMedia.innerHTML = p.glyph;
+        return;
+    }
+    if (images.length === 1) {
+        modalMedia.innerHTML = `<img src="${images[0]}" alt="${displayName}">`;
+        return;
+    }
+
+    const { t } = window.TarotLensI18n;
+    const slides = images.map((src, i) => `<img class="modal-slide" src="${src}" alt="${displayName} ${i + 1}">`).join('');
+    const dots = images.map((_, i) => `<button type="button" class="modal-dot" data-slide="${i}" aria-label="${t('modal_photoAria').replace('{n}', i + 1)}"></button>`).join('');
+
+    modalMedia.innerHTML = `
+        ${slides}
+        <button type="button" class="modal-slide-nav prev" aria-label="${t('modal_prevAria')}">‹</button>
+        <button type="button" class="modal-slide-nav next" aria-label="${t('modal_nextAria')}">›</button>
+        <div class="modal-dots">${dots}</div>
+    `;
+
+    modalMedia.querySelector('.prev').onclick = () => { modalImageIndex = (modalImageIndex - 1 + modalImages.length) % modalImages.length; renderModalSlide(); };
+    modalMedia.querySelector('.next').onclick = () => { modalImageIndex = (modalImageIndex + 1) % modalImages.length; renderModalSlide(); };
+    modalMedia.querySelectorAll('.modal-dot').forEach(dot => dot.onclick = () => { modalImageIndex = +dot.dataset.slide; renderModalSlide(); });
+
+    renderModalSlide();
+}
+
 function openProductModal(id) {
     const p = window.PRODUCTS.find(x => x.id === id);
     if (!p) return;
+    const { pick, t } = window.TarotLensI18n;
+    const displayName = pick(p, 'name');
+    const displayDesc = pick(p, 'desc');
 
-    modalMedia.innerHTML = p.img
-        ? `<img src="${p.img}" alt="${p.name}">`
-        : p.glyph;
-    modalTag.textContent = p.tag;
-    modalTitle.textContent = p.name;
+    buildModalMedia(p, displayName);
+    modalTag.textContent = pick(p, 'tag');
+    modalTitle.textContent = displayName;
+    modalDesc.textContent = displayDesc || '';
+    modalDesc.style.display = displayDesc ? '' : 'none';
 
     const specs = [
-        p.cards    ? `${p.cards} cartes` : null,
-        p.format   || null,
-        p.weight   || null,
-        p.delivery || null,
+        p.cards ? `${p.cards} ${t('unit_cards')}` : null,
+        pick(p, 'format')   || null,
+        pick(p, 'weight')   || null,
+        pick(p, 'delivery') || null,
     ].filter(Boolean);
-    modalSpecs.textContent = specs.length ? specs.join(' — ') : 'Description à venir.';
+    modalSpecs.textContent = specs.length ? specs.join(' — ') : t('modal_descTodo');
 
     modalAddBtn.onclick = () => { addToCartById(id); closeProductModal(); };
     productModal.classList.add('show');
@@ -446,13 +441,18 @@ function closeProductModal() {
 
 modalClose.addEventListener('click', closeProductModal);
 productModal.addEventListener('click', e => { if (e.target === productModal) closeProductModal(); });
-window.addEventListener('keydown', e => { if (e.key === 'Escape') closeProductModal(); });
+window.addEventListener('keydown', e => {
+    if (!productModal.classList.contains('show')) return;
+    if (e.key === 'Escape') closeProductModal();
+    if (e.key === 'ArrowLeft' && modalImages.length > 1) { modalImageIndex = (modalImageIndex - 1 + modalImages.length) % modalImages.length; renderModalSlide(); }
+    if (e.key === 'ArrowRight' && modalImages.length > 1) { modalImageIndex = (modalImageIndex + 1) % modalImages.length; renderModalSlide(); }
+});
 
 // Révélation au scroll
 const io = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); } });
 }, { threshold: 0.12 });
-document.querySelectorAll('.hero-feature, .products-section, .detail-section').forEach(el => {
+document.querySelectorAll('.hero-feature, .products-section').forEach(el => {
     el.classList.add('reveal');
     io.observe(el);
 });

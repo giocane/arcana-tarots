@@ -23,15 +23,16 @@
 
 <header class="nav" id="nav">
     <div class="nav-inner">
-        <a href="index.html" class="nav-logo">TAROTLENS</a>
+        <button class="lang-toggle" id="langToggle" type="button"></button>
+        <a href="index.html" class="nav-logo" data-i18n-attr="aria-label:nav_homeAria">TAROTLENS</a>
         <div class="nav-row">
             <button class="nav-burger" id="navBurger" aria-label="Menu" aria-expanded="false"><span></span><span></span></button>
             <nav class="nav-links" id="navLinks">
-                <a href="index.html#decks">LES DECKS</a>
-                <a href="index.html#accessoires">ACCESSOIRES</a>
+                <a href="index.html#decks" data-i18n="nav_decks">LES DECKS</a>
+                <a href="index.html#accessoires" data-i18n="nav_accessories">ACCESSOIRES</a>
                 <a href="contact.html">CONTACT</a>
             </nav>
-            <button class="nav-icon" aria-label="Panier">
+            <button class="nav-icon" data-i18n-attr="aria-label:nav_cartAria">
                 <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" d="M6 8h12l-1 12H7L6 8Zm3 0a3 3 0 0 1 6 0"/></svg>
                 <span class="nav-badge">0</span>
             </button>
@@ -41,28 +42,28 @@
 
 <main>
     <div class="legal-page">
-        <h1 class="legal-title">MENTIONS LÉGALES</h1>
+        <h1 class="legal-title" data-i18n="legal_title">MENTIONS LÉGALES</h1>
 
         <section class="legal-section" id="mentions">
-            <h2>Éditeur du site</h2>
-            <p><strong>TarotLens</strong> — à compléter avec vos informations réelles.</p>
-            <p>Contact : <a href="mailto:TarotLens129@gmail.com">TarotLens129@gmail.com</a></p>
+            <h2 data-i18n="legal_publisherTitle">Éditeur du site</h2>
+            <p><strong>TarotLens</strong> — <span data-i18n="legal_publisherText">à compléter avec vos informations réelles.</span></p>
+            <p><span data-i18n="legal_contactPrefix">Contact : </span><a href="mailto:TarotLens129@gmail.com">TarotLens129@gmail.com</a></p>
         </section>
 
         <section class="legal-section" id="confidentialite">
-            <h2>Confidentialité</h2>
-            <p>Nous collectons uniquement les données nécessaires au traitement de vos commandes.</p>
+            <h2 data-i18n="legal_privacyTitle">Confidentialité</h2>
+            <p data-i18n="legal_privacyIntro">Nous collectons uniquement les données nécessaires au traitement de vos commandes.</p>
             <ul>
-                <li>Données collectées : identité, e-mail, historique de commande.</li>
-                <li>Finalités : traitement des commandes et support.</li>
-                <li>Vos droits : accès, rectification, effacement — écrivez à <a href="mailto:TarotLens129@gmail.com">TarotLens129@gmail.com</a>.</li>
+                <li data-i18n="legal_li1">Données collectées : identité, e-mail, historique de commande.</li>
+                <li data-i18n="legal_li2">Finalités : traitement des commandes et support.</li>
+                <li><span data-i18n="legal_li3_prefix">Vos droits : accès, rectification, effacement — écrivez à </span><a href="mailto:TarotLens129@gmail.com">TarotLens129@gmail.com</a>.</li>
             </ul>
         </section>
 
         <section class="legal-section" id="cgv">
-            <h2>Conditions de vente</h2>
-            <p>Les produits TarotLens sont en pré-commande. Toute commande implique l'acceptation des présentes CGV.</p>
-            <p>Les prix sont indiqués en euros TTC. <em>À compléter selon vos conditions réelles.</em></p>
+            <h2 data-i18n="legal_cgvTitle">Conditions de vente</h2>
+            <p data-i18n="legal_cgvText1">Les produits TarotLens sont en pré-commande. Toute commande implique l'acceptation des présentes CGV.</p>
+            <p><span data-i18n="legal_cgvText2">Les prix sont indiqués en euros TTC.</span> <em data-i18n="legal_cgvText3">À compléter selon vos conditions réelles.</em></p>
         </section>
     </div>
 </main>
@@ -71,7 +72,7 @@
     <div class="footer-inner">
         <div class="footer-holo"></div>
         <div class="footer-info">
-            <p>Me contacter si vous avez des questions</p>
+            <p data-i18n="footer_contactLine">Me contacter si vous avez des questions</p>
             <div class="footer-contacts">
                 <a href="https://instagram.com/TarotLens">@TarotLens (Instagram)</a>
                 <a href="mailto:TarotLens129@gmail.com">TarotLens129@gmail.com</a>
@@ -79,12 +80,13 @@
         </div>
         <p class="footer-bye">SEE YOU THERE!</p>
         <div class="footer-legal-row">
-            <a href="legal.html">Mentions légales</a>
+            <a href="legal.html" data-i18n="footer_legalLink">Mentions légales</a>
             <span>© 2026 TarotLens</span>
         </div>
     </div>
 </footer>
 
+<script src="i18n.js?v=1"></script>
 <script src="cart.js?v=2"></script>
 <script>
 const burger = document.getElementById('navBurger');

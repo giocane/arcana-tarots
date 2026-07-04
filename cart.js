@@ -29,7 +29,7 @@
     }
 
     function wireNav() {
-        document.querySelectorAll('.nav-icon[aria-label="Panier"]').forEach(btn => {
+        document.querySelectorAll('.nav-icon').forEach(btn => {
             btn.style.cursor = 'pointer';
             btn.addEventListener('click', () => { location.href = 'panier.html'; });
         });
