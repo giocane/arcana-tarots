@@ -373,7 +373,10 @@ let modalImages = [];
 let modalImageIndex = 0;
 
 function renderModalSlide() {
-    modalMedia.querySelectorAll('.modal-slide').forEach((img, i) => img.classList.toggle('active', i === modalImageIndex));
+    modalMedia.querySelectorAll('.modal-slide').forEach((el, i) => {
+        el.classList.toggle('active', i === modalImageIndex);
+        if (el.tagName === 'VIDEO') { i === modalImageIndex ? el.play() : el.pause(); }
+    });
     modalMedia.querySelectorAll('.modal-dot').forEach((d, i) => d.classList.toggle('active', i === modalImageIndex));
 }
 
@@ -386,13 +389,19 @@ function buildModalMedia(p, displayName) {
         modalMedia.innerHTML = p.glyph;
         return;
     }
+    const isVideo = src => /\.(mp4|mov)$/i.test(src);
+
     if (images.length === 1) {
-        modalMedia.innerHTML = `<img src="${images[0]}" alt="${displayName}">`;
+        modalMedia.innerHTML = isVideo(images[0])
+            ? `<video src="${images[0]}" autoplay muted loop playsinline></video>`
+            : `<img src="${images[0]}" alt="${displayName}">`;
         return;
     }
 
     const { t } = window.TarotLensI18n;
-    const slides = images.map((src, i) => `<img class="modal-slide" src="${src}" alt="${displayName} ${i + 1}">`).join('');
+    const slides = images.map((src, i) => isVideo(src)
+        ? `<video class="modal-slide" src="${src}" muted loop playsinline></video>`
+        : `<img class="modal-slide" src="${src}" alt="${displayName} ${i + 1}">`).join('');
     const dots = images.map((_, i) => `<button type="button" class="modal-dot" data-slide="${i}" aria-label="${t('modal_photoAria').replace('{n}', i + 1)}"></button>`).join('');
 
     modalMedia.innerHTML = `
@@ -436,6 +445,7 @@ function openProductModal(id) {
 
 function closeProductModal() {
     productModal.classList.remove('show');
+    modalMedia.querySelectorAll('video').forEach(v => v.pause());
 }
 
 modalClose.addEventListener('click', closeProductModal);

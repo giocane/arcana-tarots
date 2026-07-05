@@ -67,7 +67,7 @@
             cart_thanksTitle: "Merci !",
             cart_thanksText: "Pré-commande enregistrée. Nous vous recontactons prochainement.",
             cart_backHome: "RETOUR À L'ACCUEIL",
-            lang_switchLabel: "God save the queen of wands",
+            lang_switchLabel: "God save the Queen (of wands)",
             lang_switchAria: "Switch to English",
         },
         en: {
