@@ -445,15 +445,12 @@ img { max-width: 100%; display: block; }
     .nav-links { gap: 18px; }
     .nav-links a { font-size: 18px; }
     .lang-toggle { font-size: 10px; padding: 5px 8px; gap: 4px; top: 14px; right: 14px; }
+    .lang-toggle .lang-text { display: none; }
     .products-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
     .prod-card-actions { flex-direction: column; }
     .notify-form { flex-direction: column; }
     .notify-form input { flex: none; width: 100%; }
     .notify-form button { flex: none; width: 100%; }
-}
-
-@media (max-width: 420px) {
-    .lang-toggle .lang-text { display: none; }
 }
 
 @media (max-width: 480px) {
