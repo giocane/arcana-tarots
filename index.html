@@ -315,6 +315,18 @@
     </div>
 </div>
 
+<!-- MODALE "PRÉVENEZ-MOI" -->
+<div class="modal-overlay" id="stockModal" role="dialog" aria-modal="true" aria-labelledby="stockModalTitle">
+    <div class="modal-panel stock-modal-panel">
+        <button class="modal-close" id="stockModalClose" data-i18n-attr="aria-label:modal_closeAria">&times;</button>
+        <div class="modal-body">
+            <p class="modal-tag" id="stockModalTag"></p>
+            <h3 class="modal-title stock-modal-title" id="stockModalTitle"></h3>
+            <div id="stockModalNotify"></div>
+        </div>
+    </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -361,15 +373,15 @@ function addToCartById(id) {
 }
 
 // Rupture de stock
-function notifyBlockHTML(t) {
+function notifyFormHTML(t) {
     return `
-        <span class="stock-badge">${t('stock_outOfStock')}</span>
         <form class="notify-form">
             <input type="email" required placeholder="${t('stock_notifyPlaceholder')}">
             <button type="submit" class="btn btn-ghost sm">${t('stock_notifySubmit')}</button>
         </form>
         <p class="notify-msg" hidden></p>`;
 }
+
 
 function wireNotifyForm(container, product) {
     const form = container.querySelector('.notify-form');
@@ -408,15 +420,49 @@ function renderStockStates() {
         const p = window.PRODUCTS.find(x => x.id === +card.dataset.id);
         if (!p || p.inStock !== false) return;
         card.classList.add('out-of-stock');
-        const addBtn = card.querySelector('.prod-card-actions .btn-magenta');
-        const block = document.createElement('div');
-        block.className = 'notify-block';
-        block.innerHTML = notifyBlockHTML(t);
-        addBtn.replaceWith(block);
-        wireNotifyForm(block, p);
+        const actions = card.querySelector('.prod-card-actions');
+        const addBtn = actions.querySelector('.btn-magenta');
+
+        const badge = document.createElement('span');
+        badge.className = 'stock-badge';
+        badge.textContent = t('stock_outOfStock');
+        actions.before(badge);
+
+        const notifyBtn = document.createElement('button');
+        notifyBtn.type = 'button';
+        notifyBtn.className = 'btn btn-ghost sm';
+        notifyBtn.textContent = t('stock_notifySubmit');
+        notifyBtn.addEventListener('click', () => openStockModal(p));
+        addBtn.replaceWith(notifyBtn);
     });
 }
 renderStockStates();
+
+// Modale "Prévenez-moi" (ouverte depuis le bouton de la carte produit)
+const stockModal = document.getElementById('stockModal');
+const stockModalTag = document.getElementById('stockModalTag');
+const stockModalTitle = document.getElementById('stockModalTitle');
+const stockModalNotify = document.getElementById('stockModalNotify');
+const stockModalClose = document.getElementById('stockModalClose');
+
+function openStockModal(p) {
+    const { pick, t } = window.TarotLensI18n;
+    stockModalTag.textContent = pick(p, 'tag');
+    stockModalTitle.textContent = pick(p, 'name');
+    stockModalNotify.innerHTML = notifyFormHTML(t);
+    wireNotifyForm(stockModalNotify, p);
+    stockModal.classList.add('show');
+}
+
+function closeStockModal() {
+    stockModal.classList.remove('show');
+}
+
+stockModalClose.addEventListener('click', closeStockModal);
+stockModal.addEventListener('click', e => { if (e.target === stockModal) closeStockModal(); });
+window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && stockModal.classList.contains('show')) closeStockModal();
+});
 
 // Modale produit "En savoir +"
 const productModal = document.getElementById('productModal');
@@ -501,7 +547,7 @@ function openProductModal(id) {
 
     if (p.inStock === false) {
         modalAddBtn.style.display = 'none';
-        modalNotify.innerHTML = notifyBlockHTML(t);
+        modalNotify.innerHTML = `<span class="stock-badge">${t('stock_outOfStock')}</span>` + notifyFormHTML(t);
         wireNotifyForm(modalNotify, p);
     } else {
         modalAddBtn.style.display = '';
