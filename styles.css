@@ -106,7 +106,8 @@ img { max-width: 100%; display: block; }
    BOUTONS
    ============================================================ */
 .btn {
-    display: inline-block; text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
+    text-decoration: none;
     cursor: pointer; border: 2px solid transparent;
     font-family: var(--font-body); font-weight: 700;
     font-size: 13px; letter-spacing: 1.5px;
@@ -224,7 +225,7 @@ img { max-width: 100%; display: block; }
 .prod-card-media video {
     width: 100%; height: 100%; object-fit: cover;
 }
-.prod-card-actions { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.prod-card-actions { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
 .prod-card-actions .btn { flex: 1; text-align: center; }
 
 .prod-card.out-of-stock .prod-card-media { filter: grayscale(70%); opacity: .55; }
