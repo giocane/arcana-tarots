@@ -3,6 +3,17 @@
 // Extensions > Apps Script du Sheet cible, puis déployer en Web App
 // (Exécuter en tant que : Moi — Accès : Tous). Voir le README à côté de ce fichier.
 
+// Comparaison tolérante aux accents mal encodés (NFC/NFD) et aux espaces
+// parasites, pour ne jamais retomber silencieusement sur getActiveSheet().
+function findSheet(ss, name) {
+    var target = name.normalize('NFC').trim();
+    var sheets = ss.getSheets();
+    for (var i = 0; i < sheets.length; i++) {
+        if (sheets[i].getName().normalize('NFC').trim() === target) return sheets[i];
+    }
+    return null;
+}
+
 function doPost(e) {
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
@@ -11,7 +22,11 @@ function doPost(e) {
         var ss = SpreadsheetApp.getActiveSpreadsheet();
 
         if (data.type === 'stock_interest') {
-            var stockSheet = ss.getSheetByName('Intérêts stock') || ss.getActiveSheet();
+            var stockSheet = findSheet(ss, 'Intérêts stock');
+            if (!stockSheet) {
+                throw new Error('Onglet "Intérêts stock" introuvable. Onglets existants : '
+                    + ss.getSheets().map(function (s) { return '[' + s.getName() + ']'; }).join(', '));
+            }
             stockSheet.appendRow([
                 new Date(),
                 data.email || '',
@@ -19,7 +34,7 @@ function doPost(e) {
                 data.lang || '',
             ]);
         } else {
-            var orderSheet = ss.getSheetByName('Commandes') || ss.getActiveSheet();
+            var orderSheet = findSheet(ss, 'Commandes') || ss.getActiveSheet();
             var itemsSummary = (data.items || [])
                 .map(function (it) { return it.name + ' x' + it.qty; })
                 .join(', ');
