@@ -33,6 +33,14 @@
         .cart-summary .btn { width: 100%; text-align: center; margin-top: 16px; display: block; }
         .cart-empty { text-align: center; padding: 60px 20px; }
         .cart-empty-title { font-family: var(--font-display); font-size: 36px; color: var(--orange); text-transform: uppercase; margin-bottom: 12px; }
+        .cart-order { max-width: 480px; }
+        .contact-form { display: flex; flex-direction: column; gap: 16px; }
+        .field { font-family: inherit; font-size: 15px; padding: 12px 16px; border: 2px solid rgba(26,22,20,.15); border-radius: 14px; background: var(--white); width: 100%; }
+        .field:focus { outline: 0; border-color: var(--orange); }
+        textarea.field { min-height: 100px; resize: vertical; }
+        label { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: block; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .sent-msg { font-weight: 700; font-size: 14px; margin-top: 8px; }
         @media (max-width: 680px) { .cart { grid-template-columns: 1fr; } .cart-summary { position: static; } .cart-page { padding: 48px 24px; } }
     </style>
 </head>

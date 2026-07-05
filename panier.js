@@ -1,4 +1,5 @@
 // TAROTLENS — page panier
+const ORDER_ENDPOINT = 'https://script.google.com/macros/s/REPLACE_WITH_DEPLOYMENT_ID/exec';
 const root = document.getElementById('cartRoot');
 const { t, pick } = window.TarotLensI18n;
 
@@ -60,10 +61,70 @@ function render() {
     root.querySelectorAll('[data-qty]').forEach(inp => inp.onchange = () => { window.ArcanaCart.setQty(inp.dataset.qty, +inp.value || 1); render(); });
     root.querySelectorAll('[data-remove]').forEach(b => b.onclick = () => { window.ArcanaCart.remove(b.dataset.remove); render(); });
     document.getElementById('clear').onclick = () => { window.ArcanaCart.clear(); render(); };
-    document.getElementById('checkout').onclick = () => {
+    document.getElementById('checkout').onclick = () => renderOrderForm(items, subtotal);
+}
+
+function renderOrderForm(items, subtotal) {
+    root.innerHTML = `
+    <div class="cart-order">
+        <h2 class="cart-empty-title" style="text-align:left">${t('cart_orderTitle')}</h2>
+        <form class="contact-form" id="orderForm">
+            <div class="form-group">
+                <label for="ordName">${t('cart_orderName')}</label>
+                <input id="ordName" class="field" required />
+            </div>
+            <div class="form-group">
+                <label for="ordEmail">${t('cart_orderEmail')}</label>
+                <input id="ordEmail" type="email" class="field" required />
+            </div>
+            <div class="form-group">
+                <label for="ordPhone">${t('cart_orderPhone')}</label>
+                <input id="ordPhone" class="field" />
+            </div>
+            <div class="form-group">
+                <label for="ordAddress">${t('cart_orderAddress')}</label>
+                <textarea id="ordAddress" class="field" required></textarea>
+            </div>
+            <button class="btn btn-orange" type="submit">${t('cart_orderSubmit')}</button>
+            <p id="orderError" hidden class="sent-msg" style="color:#c33">${t('cart_orderError')}</p>
+        </form>
+    </div>`;
+
+    document.getElementById('orderForm').addEventListener('submit', (e) => submitOrder(e, items, subtotal));
+}
+
+async function submitOrder(e, items, subtotal) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type=submit]');
+    const errEl = document.getElementById('orderError');
+    errEl.hidden = true;
+    btn.disabled = true;
+    btn.textContent = t('cart_orderSending');
+
+    const payload = {
+        name: document.getElementById('ordName').value,
+        email: document.getElementById('ordEmail').value,
+        phone: document.getElementById('ordPhone').value,
+        address: document.getElementById('ordAddress').value,
+        items: items.map(it => {
+            const product = (window.PRODUCTS || []).find(p => p.id === it.id);
+            return { name: product ? pick(product, 'name') : it.name, qty: it.qty, price: it.price };
+        }),
+        subtotal,
+        lang: document.documentElement.lang || 'fr',
+    };
+
+    try {
+        const res = await fetch(ORDER_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || 'unknown');
         root.innerHTML = `<div class="cart-empty"><p class="cart-empty-title">${t('cart_thanksTitle')}</p><p style="opacity:.7;margin-bottom:20px">${t('cart_thanksText')}</p><a class="btn btn-orange" href="index.html">${t('cart_backHome')}</a></div>`;
         window.ArcanaCart.clear();
-    };
+    } catch (err) {
+        btn.disabled = false;
+        btn.textContent = t('cart_orderSubmit');
+        errEl.hidden = false;
+    }
 }
 
 render();

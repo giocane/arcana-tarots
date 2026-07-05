@@ -154,6 +154,7 @@ img { max-width: 100%; display: block; }
 .hero-media {
     border-radius: var(--radius); overflow: hidden;
     position: relative;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 .hero-media img,
 .hero-media video {
@@ -192,7 +193,7 @@ img { max-width: 100%; display: block; }
     gap: 24px;
 }
 
-.prod-card { display: flex; flex-direction: column; gap: 12px; }
+.prod-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 
 .prod-card-head {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -217,6 +218,7 @@ img { max-width: 100%; display: block; }
     background: linear-gradient(135deg, #ddd5c0, #c8c0a8);
     display: grid; place-items: center;
     font-size: 52px; color: rgba(255,255,255,.7);
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 .prod-card-media img,
 .prod-card-media video {
