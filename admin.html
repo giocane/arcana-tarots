@@ -29,6 +29,7 @@
         .admin-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
         .admin-tab-btn { background: none; border: 2px solid rgba(26,22,20,.15); border-radius: 980px; padding: 9px 20px; font-family: var(--font-body); font-weight: 700; font-size: 13px; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; }
         .admin-tab-btn.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+        .admin-tab-badge { position: absolute; top: -6px; right: -6px; background: #c0392b; color: #fff; border-radius: 980px; min-width: 18px; height: 18px; padding: 0 4px; font-size: 10px; line-height: 18px; text-align: center; font-weight: 700; }
         .admin-tab-panel { display: none; }
         .admin-tab-panel.active { display: block; }
         .admin-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -127,7 +128,7 @@
 
         <div class="admin-tabs">
             <button type="button" class="admin-tab-btn" data-tab="dashboard">Tableau de bord</button>
-            <button type="button" class="admin-tab-btn" data-tab="commandes">Commandes</button>
+            <button type="button" class="admin-tab-btn" data-tab="commandes" style="position:relative">Commandes<span class="admin-tab-badge" id="badgeCommandes" hidden></span></button>
             <button type="button" class="admin-tab-btn" data-tab="stock">Stock</button>
             <button type="button" class="admin-tab-btn" data-tab="produits">Produits</button>
         </div>
@@ -334,6 +335,16 @@ function switchTab(name) {
     if (name === 'produits') chargerProduits();
 }
 
+// Macaron rouge sur l'onglet Commandes = nombre de commandes "à traiter"
+// (statut Commande reçue), pour repérer en un coup d'œil qu'il y a du
+// nouveau sans avoir à ouvrir l'onglet.
+function majBadgeCommandes(commandes) {
+    const badge = document.getElementById('badgeCommandes');
+    const n = commandes.filter(c => c.statut === 'Commande reçue').length;
+    badge.textContent = n;
+    badge.hidden = n === 0;
+}
+
 /* ==================== Tableau de bord ==================== */
 
 async function chargerDashboard() {
@@ -344,6 +355,7 @@ async function chargerDashboard() {
     if (!repCommandes.ok) { document.getElementById('dashboardStats').innerHTML = `Erreur : ${escapeHTML(repCommandes.error)}`; return; }
 
     const commandes = repCommandes.commandes;
+    majBadgeCommandes(commandes);
     const produits = repProduits.ok ? repProduits.produits : [];
     const stockParId = {};
     (repStock.ok ? repStock.stock : []).forEach(s => { stockParId[s.id] = s.qty; });
@@ -389,6 +401,7 @@ async function chargerCommandes() {
     const rep = await api('adminListCommandes');
     if (!rep.ok) { el.innerHTML = `<tr><td colspan="9">Erreur : ${escapeHTML(rep.error)}</td></tr>`; return; }
     commandesCache = rep.commandes;
+    majBadgeCommandes(commandesCache);
     renderCommandes();
 }
 
@@ -400,6 +413,7 @@ async function enregistrerStatut(row, statut, suivi) {
         toast('Statut mis à jour, client notifié par e-mail.');
         const c = commandesCache.find(x => x.row === row);
         if (c) { c.statut = statut; if (suivi) c.suivi = suivi; }
+        majBadgeCommandes(commandesCache);
         renderCommandes();
     } else {
         toast(rep.error, true);
