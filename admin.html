@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         .admin-wrap { max-width: 1080px; margin: 0 auto; padding: 48px 24px 100px; }
+        .admin-wrap:has(#tab-commandes.active) { max-width: 1440px; }
         .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
         .admin-title { font-family: var(--font-display); font-size: clamp(32px,5vw,48px); color: var(--orange); text-transform: uppercase; line-height: .9; }
         .admin-logout { background: none; border: 2px solid rgba(26,22,20,.15); border-radius: 980px; padding: 8px 18px; font-family: var(--font-body); font-weight: 600; font-size: 13px; cursor: pointer; }
@@ -35,8 +36,8 @@
 
         /* Tables */
         .admin-table-wrap { background: var(--white); border-radius: var(--radius); overflow-x: auto; }
-        table.admin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        table.admin-table th, table.admin-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid rgba(26,22,20,.08); vertical-align: top; }
+        table.admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.admin-table th, table.admin-table td { padding: 10px 10px; text-align: left; border-bottom: 1px solid rgba(26,22,20,.08); vertical-align: top; }
         table.admin-table th { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; opacity: .6; }
         table.admin-table tr:last-child td { border-bottom: 0; }
 
@@ -158,6 +159,7 @@
                         <option value="Annulée">Annulée</option>
                     </select>
                 </div>
+                <button type="button" class="btn btn-ghost sm" id="refreshCommandesBtn">Actualiser</button>
                 <button type="button" class="btn btn-ghost sm" id="exportCsvBtn">Exporter en CSV</button>
                 <button type="button" class="btn btn-ghost sm" id="exportXlsxBtn">Exporter en XLSX</button>
             </div>
@@ -226,6 +228,7 @@
                 <div class="admin-form-group"><label>Description (FR)</label><textarea class="admin-field" id="f_desc"></textarea></div>
                 <div class="admin-form-group"><label>Description (EN)</label><textarea class="admin-field" id="f_desc_en"></textarea></div>
                 <label class="admin-checkbox-row"><input type="checkbox" id="f_inStock"> Produit en stock (décoché = rupture, sauf si suivi dans l'onglet Stock)</label>
+                <p class="admin-help" id="stockTrackedHint" hidden style="color:#c0392b">⚠️ Ce produit est suivi dans l'onglet <strong>Stock</strong> (quantité actuelle : <strong id="stockTrackedQty"></strong>). Cette case n'a aucun effet tant que cette quantité n'est pas changée là-bas, dans l'onglet Stock.</p>
             </div>
 
             <p class="admin-section-label">Photos &amp; vidéos</p>
@@ -459,6 +462,7 @@ function renderCommandes() {
 }
 
 document.getElementById('filtreStatut').addEventListener('change', renderCommandes);
+document.getElementById('refreshCommandesBtn').addEventListener('click', chargerCommandes);
 
 const COLONNES_COMMANDES = [
     { cle: 'date', libelle: 'Date' }, { cle: 'name', libelle: 'Nom' }, { cle: 'email', libelle: 'Email' },
@@ -504,13 +508,12 @@ async function chargerStock() {
     const [repProduits, repStock] = await Promise.all([api('adminListProduits'), api('adminListStock')]);
     if (!repProduits.ok) { el.innerHTML = `<tr><td colspan="3">Erreur : ${escapeHTML(repProduits.error)}</td></tr>`; return; }
     produitsCache = repProduits.produits;
-    const stockParId = {};
-    (repStock.ok ? repStock.stock : []).forEach(s => { stockParId[s.id] = s.qty; });
+    if (repStock.ok) { stockParIdCache = {}; repStock.stock.forEach(s => { stockParIdCache[s.id] = s.qty; }); }
 
     if (!produitsCache.length) { el.innerHTML = '<tr><td colspan="3">Aucun produit — remplis d\'abord l\'onglet Produits.</td></tr>'; return; }
 
     el.innerHTML = produitsCache.map(p => {
-        const qty = stockParId[p.id];
+        const qty = stockParIdCache[p.id];
         const low = typeof qty === 'number' && qty <= 3;
         return `
         <tr class="${low ? 'admin-row-low' : ''}">
@@ -534,13 +537,18 @@ async function chargerStock() {
 /* ==================== Produits ==================== */
 
 let produitsCache = [];
+// Quantité par id, alimentée par cet onglet et par l'onglet Stock — sert à
+// avertir dans la modale produit quand la case "en stock" est sans effet
+// (produit suivi dans l'onglet Stock, voir ouvrirFormProduit).
+let stockParIdCache = {};
 
 async function chargerProduits() {
     const el = document.getElementById('produitsListe');
     el.innerHTML = 'Chargement…';
-    const rep = await api('adminListProduits');
-    if (!rep.ok) { el.innerHTML = `Erreur : ${escapeHTML(rep.error)}`; return; }
-    produitsCache = rep.produits;
+    const [repProduits, repStock] = await Promise.all([api('adminListProduits'), api('adminListStock')]);
+    if (!repProduits.ok) { el.innerHTML = `Erreur : ${escapeHTML(repProduits.error)}`; return; }
+    produitsCache = repProduits.produits;
+    if (repStock.ok) { stockParIdCache = {}; repStock.stock.forEach(s => { stockParIdCache[s.id] = s.qty; }); }
     renderProduitsListe();
 }
 
@@ -601,6 +609,9 @@ function ouvrirFormProduit(id) {
     document.getElementById('f_desc').value = p.desc || '';
     document.getElementById('f_desc_en').value = p.desc_en || '';
     document.getElementById('f_inStock').checked = p.inStock !== false;
+    const qtyTracked = stockParIdCache[p.id];
+    document.getElementById('stockTrackedHint').hidden = typeof qtyTracked !== 'number';
+    if (typeof qtyTracked === 'number') document.getElementById('stockTrackedQty').textContent = qtyTracked;
     renderImagesEditeur();
 
     document.getElementById('produitModalTitle').textContent = id ? 'Modifier le produit' : 'Nouveau produit';
