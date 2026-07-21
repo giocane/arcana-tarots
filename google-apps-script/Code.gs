@@ -530,6 +530,13 @@ function listerCommandesBrutes(sheet) {
     return out;
 }
 
+function supprimerCommande(ss, row) {
+    var sh = findSheet(ss, 'Commandes');
+    if (!sh) throw new Error('Onglet "Commandes" introuvable.');
+    if (!row || row < 1) throw new Error('Ligne invalide.');
+    sh.deleteRow(row);
+}
+
 // Envoie au client l'e-mail de suivi correspondant au nouveau statut, dans la
 // langue de sa commande (repli sur le français si langue inconnue).
 function envoyerMailStatutCommande(commande, statut, suivi) {
@@ -736,6 +743,9 @@ function handleAdmin(action, p) {
             return { ok: true, commandes: listerCommandesBrutes(shCommandes) };
         case 'adminSetStatutCommande':
             definirStatutCommande(ss, Number(p.row), String(p.statut || ''), String(p.suivi || ''));
+            return { ok: true };
+        case 'adminDeleteCommande':
+            supprimerCommande(ss, Number(p.row));
             return { ok: true };
         case 'adminListStock':
             return { ok: true, stock: listerStock(ss) };

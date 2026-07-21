@@ -167,7 +167,7 @@
             <div class="admin-table-wrap">
                 <table class="admin-table">
                     <thead>
-                        <tr><th>Date</th><th>Client</th><th>Contact</th><th>Adresse</th><th>Articles</th><th>Montant</th><th>Langue</th><th>Statut</th><th>Suivi</th></tr>
+                        <tr><th>Date</th><th>Client</th><th>Contact</th><th>Adresse</th><th>Articles</th><th>Montant</th><th>Langue</th><th>Statut</th><th>Suivi</th><th></th></tr>
                     </thead>
                     <tbody id="commandesBody"></tbody>
                 </table>
@@ -397,9 +397,9 @@ let commandesCache = [];
 
 async function chargerCommandes() {
     const el = document.getElementById('commandesBody');
-    el.innerHTML = '<tr><td colspan="9">Chargement…</td></tr>';
+    el.innerHTML = '<tr><td colspan="10">Chargement…</td></tr>';
     const rep = await api('adminListCommandes');
-    if (!rep.ok) { el.innerHTML = `<tr><td colspan="9">Erreur : ${escapeHTML(rep.error)}</td></tr>`; return; }
+    if (!rep.ok) { el.innerHTML = `<tr><td colspan="10">Erreur : ${escapeHTML(rep.error)}</td></tr>`; return; }
     commandesCache = rep.commandes;
     majBadgeCommandes(commandesCache);
     renderCommandes();
@@ -426,7 +426,7 @@ function renderCommandes() {
     const lignes = filtre ? commandesCache.filter(c => c.statut === filtre) : commandesCache;
     document.getElementById('commandesCount').textContent = lignes.length + ' / ' + commandesCache.length + ' commande(s)';
 
-    if (!lignes.length) { el.innerHTML = '<tr><td colspan="9">Aucune commande.</td></tr>'; return; }
+    if (!lignes.length) { el.innerHTML = '<tr><td colspan="10">Aucune commande.</td></tr>'; return; }
     el.innerHTML = lignes.map(c => {
         const sujet = encodeURIComponent('TarotLens — à propos de votre commande');
         const corps = encodeURIComponent(`Bonjour ${c.name || ''},\n\n`);
@@ -450,6 +450,7 @@ function renderCommandes() {
                     <input class="admin-field" style="width:110px" placeholder="N° suivi" data-suivi-input="${c.row}">
                     <button type="button" class="btn btn-ghost sm" data-suivi-confirm="${c.row}">OK</button>
                 </div>`}</td>
+            <td><button type="button" class="btn btn-ghost sm" style="color:#c0392b;border-color:#c0392b" data-delete-commande="${c.row}">Suppr.</button></td>
         </tr>`;
     }).join('');
     el.querySelectorAll('.admin-select-statut').forEach(sel => {
@@ -471,6 +472,22 @@ function renderCommandes() {
             const suivi = input.value.trim();
             if (!suivi) { input.focus(); return; }
             enregistrerStatut(row, 'Expédié', suivi);
+        });
+    });
+    el.querySelectorAll('[data-delete-commande]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const row = +btn.dataset.deleteCommande;
+            const c = commandesCache.find(x => x.row === row);
+            if (!confirm(`Supprimer la commande de ${c ? c.name : 'ce client'} ? Cette action est irréversible.`)) return;
+            const rep = await api('adminDeleteCommande', { row });
+            if (rep.ok) {
+                toast('Commande supprimée.');
+                commandesCache = commandesCache.filter(x => x.row !== row);
+                majBadgeCommandes(commandesCache);
+                renderCommandes();
+            } else {
+                toast(rep.error, true);
+            }
         });
     });
 }
