@@ -15,9 +15,12 @@ cp styles.css dist/
 cp .htaccess robots.txt dist/
 
 mkdir -p dist/images dist/videos
-rsync -a --exclude 'Has Been Tarot' --exclude 'Too Much Lenormand' \
-    --exclude 'Too Much Tarot' --exclude 'Bundle' --exclude 'gallery' \
-    --exclude '.DS_Store' images/ dist/images/
-rsync -a --exclude '.DS_Store' videos/ dist/videos/
+cp -R images/. dist/images/
+rm -rf "dist/images/Has Been Tarot" "dist/images/Too Much Lenormand" \
+    "dist/images/Too Much Tarot" "dist/images/Bundle" "dist/images/gallery"
+find dist/images -name '.DS_Store' -delete
+
+cp -R videos/. dist/videos/
+find dist/videos -name '.DS_Store' -delete
 
 echo "dist/ prêt — envoie tout son contenu (pas le dossier dist lui-même) à la racine du sous-domaine/sous-dossier sur O2Switch."
