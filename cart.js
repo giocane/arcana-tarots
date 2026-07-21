@@ -46,7 +46,7 @@ window.TAROTLENS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwJYKhBL0pK
 // par le client), avec un cache court pour éviter d'appeler l'API à chaque page.
 window.ArcanaStock = (function () {
     const CACHE_KEY = 'tarotlens_stock_cache';
-    const TTL_MS = 5 * 60 * 1000;
+    const TTL_MS = 30 * 1000;
     let data = null;
 
     function readCache() {
