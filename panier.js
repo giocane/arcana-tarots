@@ -78,11 +78,19 @@ function renderOrderForm(items, subtotal) {
             </div>
             <div class="form-group">
                 <label for="ordPhone">${t('cart_orderPhone')}</label>
-                <input id="ordPhone" class="field" />
+                <input id="ordPhone" class="field" required />
             </div>
             <div class="form-group">
                 <label for="ordAddress">${t('cart_orderAddress')}</label>
                 <textarea id="ordAddress" class="field" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="ordCp">${t('cart_orderCp')}</label>
+                <input id="ordCp" class="field" required />
+            </div>
+            <div class="form-group">
+                <label for="ordPays">${t('cart_orderPays')}</label>
+                <input id="ordPays" class="field" required />
             </div>
             <button class="btn btn-orange" type="submit">${t('cart_orderSubmit')}</button>
             <p id="orderError" hidden class="sent-msg" style="color:#c33">${t('cart_orderError')}</p>
@@ -100,12 +108,16 @@ async function submitOrder(e, items, subtotal) {
     btn.disabled = true;
     btn.textContent = t('cart_orderSending');
 
+    const address = document.getElementById('ordAddress').value;
+    const cp = document.getElementById('ordCp').value;
+    const pays = document.getElementById('ordPays').value;
+
     const payload = {
         type: 'order',
         name: document.getElementById('ordName').value,
         email: document.getElementById('ordEmail').value,
         phone: document.getElementById('ordPhone').value,
-        address: document.getElementById('ordAddress').value,
+        address: `${address}\n${cp} ${pays}`,
         items: items.map(it => {
             const product = (window.PRODUCTS || []).find(p => p.id === it.id);
             return { name: product ? pick(product, 'name') : it.name, qty: it.qty, price: it.price };
