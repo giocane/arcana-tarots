@@ -139,6 +139,10 @@ async function submitOrder(e, items, subtotal) {
         if (!data.ok) throw new Error(data.error || 'unknown');
         root.innerHTML = `<div class="cart-empty"><p class="cart-empty-title">${t('cart_thanksTitle')}</p><p style="opacity:.7;margin-bottom:20px">${t('cart_thanksText')}</p><a class="btn btn-orange" href="index.html">${t('cart_backHome')}</a></div>`;
         window.ArcanaCart.clear();
+        // Le formulaire remplacé est plus court que le contenu précédent : sans ça,
+        // le scroll reste où l'utilisateur l'a laissé (près du bouton "Envoyer", en
+        // bas de page) et retombe sur le footer au lieu du message de confirmation.
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
         btn.disabled = false;
         btn.textContent = t('cart_orderSubmit');
