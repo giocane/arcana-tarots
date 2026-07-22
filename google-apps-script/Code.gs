@@ -11,7 +11,11 @@
 //   - "Commandes"       : archive des commandes (remplie automatiquement). Colonnes :
 //                         date, nom, email, tel, adresse, articles, sous-total,
 //                         langue, statut (voir STATUTS_COMMANDE), numéro de suivi
-//                         (rempli seulement au statut Expédié). Chaque changement de
+//                         (rempli seulement au statut Expédié), articles au format
+//                         JSON [{id,qty}] (usage interne, voir decrementerStockCommande),
+//                         stock déjà décrémenté (booléen, usage interne — garantit
+//                         un décompte une seule fois même si le statut repasse
+//                         plusieurs fois par "Paiement validé"). Chaque changement de
 //                         statut (sauf Annulée) envoie un e-mail auto au client dans
 //                         sa langue — voir MAILS_STATUT_COMMANDE.
 //   - "Intérêts stock"  : inscriptions "prévenez-moi" (remplie automatiquement).
@@ -688,9 +692,29 @@ function definirStatutCommande(ss, row, statut, suivi) {
     sh.getRange(row, 9).setValue(statut);
     if (statut === 'Expédié') sh.getRange(row, 10).setValue(String(suivi || '').trim());
 
-    var r = sh.getRange(row, 1, 1, 8).getValues()[0];
+    var r = sh.getRange(row, 1, 1, 12).getValues()[0];
     envoyerMailStatutCommande({ name: r[1], email: r[2], lang: r[7] }, statut, suivi);
+
+    // Décompte le Stock au premier statut atteint à partir de "Paiement validé"
+    // inclus (et pas seulement une transition exacte vers ce statut) : dans la
+    // pratique, l'admin saute parfois directement à "En préparation" ou
+    // "Expédié" sans passer par "Paiement validé" au préalable, et le stock
+    // doit quand même être décompté. "Annulée" ne décompte jamais. La colonne
+    // 12 (posée à true juste après le premier décompte) garantit que ça
+    // n'arrive qu'une seule fois par commande, quel que soit le nombre
+    // d'allers-retours ultérieurs sur les statuts.
+    var indexAtteint = PROGRESSION_STATUTS_STOCK.indexOf(statut);
+    var indexSeuil = PROGRESSION_STATUTS_STOCK.indexOf('Paiement validé');
+    if (indexAtteint >= indexSeuil && r[11] !== true) {
+        decrementerStockCommande(ss, r[10]);
+        sh.getRange(row, 12).setValue(true);
+    }
 }
+
+// Ordre de progression utilisé uniquement pour déclencher le décompte de
+// stock (voir definirStatutCommande) — "Annulée" en est volontairement
+// exclu (indexOf renvoie -1, donc jamais >= au seuil).
+var PROGRESSION_STATUTS_STOCK = ['Commande reçue', 'Paiement validé', 'En préparation', 'Expédié'];
 
 /* ==================== Stock (admin) ==================== */
 
@@ -718,6 +742,35 @@ function definirStock(ss, id, nom, qty) {
         }
     }
     sh.appendRow([Number(id), nom || '', Number(qty) || 0]);
+}
+
+// Décrémente le Stock pour les articles d'une commande passée au statut
+// "Paiement validé" (voir definirStatutCommande, qui garantit l'appel une
+// seule fois par commande via la colonne "stock déjà décrémenté"). Ne touche
+// que les produits ayant une ligne dans l'onglet Stock — un id absent =
+// produit non suivi, comme partout ailleurs dans l'app. itemsJson vient de la
+// colonne interne posée par doPost (voir sendOrderEmail/doPost) ; une valeur
+// vide/invalide (anciennes commandes antérieures à cette fonctionnalité) ne
+// fait rien.
+function decrementerStockCommande(ss, itemsJson) {
+    var items;
+    try { items = JSON.parse(itemsJson || '[]'); } catch (e) { return; }
+    if (!Array.isArray(items) || !items.length) return;
+
+    var sh = findSheet(ss, 'Stock');
+    if (!sh) return;
+    var rows = sh.getDataRange().getValues();
+
+    items.forEach(function (it) {
+        if (!it || it.id == null || !it.qty) return;
+        for (var i = 1; i < rows.length; i++) {
+            if (Number(rows[i][0]) === Number(it.id)) {
+                var actuel = typeof rows[i][2] === 'number' ? rows[i][2] : 0;
+                sh.getRange(i + 1, 3).setValue(actuel - Number(it.qty));
+                break;
+            }
+        }
+    });
 }
 
 /* ==================== Digest quotidien (automatisation) ==================== */
@@ -762,7 +815,10 @@ function supprimerInteret(ss, row) {
 function envoyerDigestQuotidien() {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var stock = listerStock(ss);
-    var epuises = stock.filter(function (s) { return s.qty === 0; });
+    // <= 0 et pas === 0 : une décrémentation automatique (voir
+    // decrementerStockCommande) peut faire passer une quantité sous zéro en cas
+    // de survente, et ça doit rester détecté comme une rupture.
+    var epuises = stock.filter(function (s) { return s.qty <= 0; });
     var faibles = stock.filter(function (s) { return s.qty > 0 && s.qty <= SEUIL_STOCK_FAIBLE; });
     var interets = listerInteretsStock(ss);
 
@@ -1046,6 +1102,12 @@ function doPost(e) {
             var itemsSummary = (data.items || [])
                 .map(function (it) { return it.name + ' x' + it.qty; })
                 .join(', ');
+            // Doublon technique des articles (id + qty), pour décrémenter le Stock de
+            // façon fiable au statut "Paiement validé" sans dépendre du nom affiché
+            // (qui varie en FR/EN) — voir decrementerStockCommande/definirStatutCommande.
+            var itemsJson = JSON.stringify((data.items || []).map(function (it) {
+                return { id: it.id, qty: it.qty };
+            }));
 
             orderSheet.appendRow([
                 new Date(),
@@ -1058,6 +1120,8 @@ function doPost(e) {
                 data.lang || '',
                 'Commande reçue',
                 '',
+                itemsJson,
+                false,
             ]);
 
             sendOrderEmail(data);

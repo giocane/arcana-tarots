@@ -191,7 +191,7 @@
             <div class="admin-table-wrap">
                 <table class="admin-table">
                     <thead>
-                        <tr><th>Date</th><th>Client</th><th>Contact</th><th>Adresse</th><th>Articles</th><th>Montant</th><th>Langue</th><th>Statut</th><th>Suivi</th><th></th></tr>
+                        <tr><th>Date</th><th>Client</th><th>Contact</th><th>Adresse</th><th>Articles</th><th>Montant</th><th>Langue</th><th>Statut commande</th><th>Suivi</th><th></th></tr>
                     </thead>
                     <tbody id="commandesBody"></tbody>
                 </table>
@@ -287,6 +287,16 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbwJYKhBL0pKlUAAsc6fnodg0DmUOjcxSaNwGPH1wTBzv8N6l4EgMHU2QplZhC9MtOO8/exec';
 const KEY_STORAGE = 'tarotlens_admin_key';
 const STATUTS = ['Commande reçue', 'Paiement validé', 'En préparation', 'Expédié', 'Annulée'];
+// Libellés affichés dans le menu déroulant de la colonne "Statut commande" —
+// le mot "commande" est déjà dans l'en-tête de colonne, inutile de le répéter
+// sur chaque option (la valeur envoyée au backend reste le libellé complet).
+const STATUT_LABELS = {
+    'Commande reçue': 'Reçue',
+    'Paiement validé': 'Paiement validé',
+    'En préparation': 'En préparation',
+    'Expédié': 'Expédié',
+    'Annulée': 'Annulée',
+};
 // Espaces/accents dans les libellés de statut -> pas utilisables tels quels comme
 // classe CSS (un espace scinderait en plusieurs classes), d'où cette table.
 const STATUT_CLASSES = {
@@ -523,9 +533,9 @@ function renderCommandes() {
             <td data-label="Articles">${escapeHTML(c.items)}</td>
             <td data-label="Montant">${c.subtotal ? escapeHTML(c.subtotal) + ' €' : '—'}</td>
             <td data-label="Langue">${escapeHTML(c.lang)}</td>
-            <td data-label="Statut">
+            <td data-label="Statut commande">
                 <select class="admin-field admin-select-statut" data-row="${c.row}">
-                    ${STATUTS.map(s => `<option value="${s}" ${s === c.statut ? 'selected' : ''}>${s}</option>`).join('')}
+                    ${STATUTS.map(s => `<option value="${s}" ${s === c.statut ? 'selected' : ''}>${STATUT_LABELS[s] || s}</option>`).join('')}
                 </select>
             </td>
             <td data-label="Suivi">${c.suivi ? escapeHTML(c.suivi) : `

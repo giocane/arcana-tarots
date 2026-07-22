@@ -127,7 +127,9 @@ async function submitOrder(e, items, subtotal) {
         address: `${address}\n${cp} ${pays}`,
         items: items.map(it => {
             const product = (window.PRODUCTS || []).find(p => p.id === it.id);
-            return { name: product ? pick(product, 'name') : it.name, qty: it.qty, price: it.price };
+            // id transmis pour que le backend décrémente le Stock par id produit au
+            // statut "Paiement validé" — pas par nom, qui varie en FR/EN.
+            return { id: it.id, name: product ? pick(product, 'name') : it.name, qty: it.qty, price: it.price };
         }),
         subtotal,
         lang: document.documentElement.lang || 'fr',
