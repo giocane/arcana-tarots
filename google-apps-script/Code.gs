@@ -30,7 +30,19 @@ var MAIL_SITE_URL = 'https://tarotlens.pages.dev';
 // rainbow tables ; la clé elle-même n'est jamais stockée en clair, voir definirCleAdmin).
 var SALT = 'tarotlens-once-famous-4ever-fabulous';
 
+// Anti brute-force sur adminLogin : au-delà de ce nombre d'échecs, tout nouvel
+// essai (même avec la bonne clé) est bloqué jusqu'à expiration de la fenêtre
+// glissante ci-dessous — voir tropDeTentativesLogin/enregistrerTentativeLogin.
+var LOGIN_MAX_TENTATIVES = 8;
+var LOGIN_FENETRE_SECONDES = 900; // 15 min
+
 var STATUTS_COMMANDE = ['Commande reçue', 'Paiement validé', 'En préparation', 'Expédié', 'Annulée'];
+
+// Anciens libellés de statut (avant l'overhaul du workflow) encore présents sur
+// des commandes historiques du Sheet — mappés à la volée dans
+// listerCommandesBrutes() pour un affichage correct immédiat, et corrigeables
+// définitivement dans le Sheet via le menu "Corriger les anciens statuts".
+var STATUTS_LEGACY_MAP = { 'Nouvelle': 'Commande reçue', 'Expédiée': 'Expédié' };
 
 // Statuts qui déclenchent un e-mail automatique au client (voir
 // envoyerMailStatutCommande) — Annulée est un statut interne, pas notifié.
@@ -108,6 +120,8 @@ function onOpen() {
         .addItem('Définir la clé admin', 'definirCleAdmin')
         .addSeparator()
         .addItem('Installer les automatisations (digest quotidien)', 'installerAutomatisations')
+        .addSeparator()
+        .addItem('Corriger les anciens statuts (migration unique)', 'migrerAnciensStatutsCommandes')
         .addToUi();
 }
 
@@ -326,28 +340,41 @@ function supprimerProduit(ss, id) {
     throw new Error('Produit id ' + id + ' introuvable.');
 }
 
-// Échange la ligne du produit avec sa voisine (haut/bas) : c'est l'ordre des
-// lignes qui pilote l'ordre d'affichage sur le site (voir listerProduits()).
+// Déplace le produit au-delà de son voisin de MÊME catégorie le plus proche
+// (haut/bas) — les lignes d'autres catégories intercalées entre les deux sont
+// simplement décalées d'un cran, pas traitées comme des obstacles. Sans ça,
+// un accessoire glissé entre deux decks empêchait de réordonner les decks
+// entre eux d'un seul clic. C'est toujours l'ordre des lignes du Sheet qui
+// pilote l'ordre d'affichage sur le site (voir listerProduits()).
 function deplacerProduit(ss, id, sens) {
     var sh = getSheetProduits(ss);
     var rows = sh.getDataRange().getValues();
-    var idCol = rows[0].map(function (h) { return String(h).trim(); }).indexOf('id');
+    var headers = rows[0].map(function (h) { return String(h).trim(); });
+    var idCol = headers.indexOf('id');
+    var catCol = headers.indexOf('cat');
     if (idCol < 0) throw new Error('Colonne "id" introuvable dans l\'onglet Produits.');
+    if (catCol < 0) throw new Error('Colonne "cat" introuvable dans l\'onglet Produits.');
 
+    var data = rows.slice(1);
     var idx = -1;
-    for (var i = 1; i < rows.length; i++) {
-        if (Number(rows[i][idCol]) === Number(id)) { idx = i; break; }
+    for (var i = 0; i < data.length; i++) {
+        if (Number(data[i][idCol]) === Number(id)) { idx = i; break; }
     }
     if (idx < 0) throw new Error('Produit id ' + id + ' introuvable.');
+    var cat = data[idx][catCol];
 
-    var cible = sens === 'up' ? idx - 1 : idx + 1;
-    if (cible < 1 || cible >= rows.length) return; // déjà en haut/bas de la liste
+    var voisin = -1;
+    if (sens === 'up') {
+        for (var a = idx - 1; a >= 0; a--) { if (data[a][catCol] === cat) { voisin = a; break; } }
+    } else {
+        for (var b = idx + 1; b < data.length; b++) { if (data[b][catCol] === cat) { voisin = b; break; } }
+    }
+    if (voisin < 0) return; // déjà en haut/bas de sa catégorie
 
-    var nbCols = rows[0].length;
-    var ligneA = sh.getRange(idx + 1, 1, 1, nbCols).getValues();
-    var ligneB = sh.getRange(cible + 1, 1, 1, nbCols).getValues();
-    sh.getRange(idx + 1, 1, 1, nbCols).setValues(ligneB);
-    sh.getRange(cible + 1, 1, 1, nbCols).setValues(ligneA);
+    var deplace = data.splice(idx, 1)[0];
+    data.splice(voisin, 0, deplace);
+
+    sh.getRange(2, 1, data.length, headers.length).setValues(data);
     viderCacheProduits();
 }
 
@@ -530,11 +557,13 @@ function listerCommandesBrutes(sheet) {
     for (var i = debut; i < rows.length; i++) {
         var r = rows[i];
         if (!r[1] && !r[2]) continue; // ni nom ni email -> ligne vide
+        var statutBrut = r[8] || 'Commande reçue';
         out.push({
             row: i + 1,
             date: (r[0] instanceof Date) ? r[0].toISOString() : String(r[0] || ''),
             name: r[1] || '', email: r[2] || '', phone: r[3] || '', address: r[4] || '',
-            items: r[5] || '', subtotal: r[6] || '', lang: r[7] || '', statut: r[8] || 'Commande reçue',
+            items: r[5] || '', subtotal: r[6] || '', lang: r[7] || '',
+            statut: STATUTS_LEGACY_MAP[statutBrut] || statutBrut,
             suivi: r[9] || '',
         });
     }
@@ -547,6 +576,26 @@ function supprimerCommande(ss, row) {
     if (!sh) throw new Error('Onglet "Commandes" introuvable.');
     if (!row || row < 1) throw new Error('Ligne invalide.');
     sh.deleteRow(row);
+}
+
+// Réécrit dans le Sheet les anciens libellés de statut (voir
+// STATUTS_LEGACY_MAP) par leur équivalent actuel — à lancer une fois depuis le
+// menu TarotLens. listerCommandesBrutes() les affiche déjà correctement même
+// sans ça ; ce menu corrige la valeur stockée pour de bon (exports, tri, etc.).
+function migrerAnciensStatutsCommandes() {
+    var ui = SpreadsheetApp.getUi();
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sh = findSheet(ss, 'Commandes');
+    if (!sh) { ui.alert('Onglet "Commandes" introuvable.'); return; }
+    var rows = sh.getDataRange().getValues();
+    var corrections = 0;
+    for (var i = 1; i < rows.length; i++) {
+        var nouveau = STATUTS_LEGACY_MAP[rows[i][8]];
+        if (nouveau) { sh.getRange(i + 1, 9).setValue(nouveau); corrections++; }
+    }
+    ui.alert(corrections
+        ? corrections + ' commande(s) migrée(s) vers les nouveaux statuts.'
+        : 'Aucune commande à migrer — tous les statuts sont déjà à jour.');
 }
 
 // Échappe le texte injecté dans les e-mails HTML (nom du client, numéro de
@@ -672,9 +721,25 @@ function listerInteretsStock(ss) {
     for (var i = debut; i < rows.length; i++) {
         var r = rows[i];
         if (!r[1] && !r[2]) continue; // ni email ni produit -> ligne vide
-        out.push({ date: r[0], email: r[1] || '', product: r[2] || '', lang: r[3] || '' });
+        out.push({
+            row: i + 1,
+            date: (r[0] instanceof Date) ? r[0].toISOString() : String(r[0] || ''),
+            email: r[1] || '', product: r[2] || '', lang: r[3] || '',
+        });
     }
+    out.reverse();
     return out;
+}
+
+// Supprime une demande "prévenez-moi" une fois traitée — utilisé par le
+// bouton dédié dans l'onglet Stock de admin.html (voir aussi la note dans
+// envoyerDigestQuotidien : c'était déjà la façon prévue de les retirer,
+// juste sans bouton avant).
+function supprimerInteret(ss, row) {
+    var sh = findSheet(ss, 'Intérêts stock');
+    if (!sh) throw new Error('Onglet "Intérêts stock" introuvable.');
+    if (!row || row < 1) throw new Error('Ligne invalide.');
+    sh.deleteRow(row);
 }
 
 // Digest cumulatif (pas de delta) : à chaque envoi, l'e-mail reliste tout ce
@@ -770,6 +835,21 @@ function televerserPhoto(filename, mimeType, base64) {
 
 /* ==================== Dispatch API (action) ==================== */
 
+// Fenêtre glissante d'échecs sur adminLogin uniquement (pas sur les autres
+// actions admin*, pour qu'une clé devenue invalide en cours de session — ex.
+// rotation de clé dans un autre onglet — ne verrouille pas une reconnexion
+// légitime). Compteur en CacheService : expire tout seul, pas de verrou permanent.
+function tropDeTentativesLogin() {
+    var n = Number(CacheService.getScriptCache().get('admin_login_echecs') || 0);
+    return n >= LOGIN_MAX_TENTATIVES;
+}
+function enregistrerTentativeLogin(reussite) {
+    var cache = CacheService.getScriptCache();
+    if (reussite) { cache.remove('admin_login_echecs'); return; }
+    var n = Number(cache.get('admin_login_echecs') || 0) + 1;
+    cache.put('admin_login_echecs', String(n), LOGIN_FENETRE_SECONDES);
+}
+
 function handleAction(p) {
     try {
         var action = String(p.action || '');
@@ -777,6 +857,12 @@ function handleAction(p) {
 
         if (action.indexOf('admin') === 0) {
             var isAdmin = !!(p.ak && hacherCleAdmin(p.ak) === getAdminKeyHash());
+            if (action === 'adminLogin') {
+                if (!isAdmin && tropDeTentativesLogin()) {
+                    return { ok: false, error: 'Trop de tentatives échouées. Réessaie dans quelques minutes.' };
+                }
+                enregistrerTentativeLogin(isAdmin);
+            }
             if (!isAdmin) return { ok: false, error: 'auth' };
             return handleAdmin(action, p);
         }
@@ -818,6 +904,11 @@ function handleAdmin(action, p) {
             return { ok: true, stock: listerStock(ss) };
         case 'adminSetStock':
             definirStock(ss, p.id, p.nom, p.qty);
+            return { ok: true };
+        case 'adminListInterets':
+            return { ok: true, interets: listerInteretsStock(ss) };
+        case 'adminDeleteInteret':
+            supprimerInteret(ss, Number(p.row));
             return { ok: true };
         default:
             return { ok: false, error: 'Action admin inconnue : ' + action };

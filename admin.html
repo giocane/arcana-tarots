@@ -47,6 +47,20 @@
         table.admin-table th { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; opacity: .6; }
         table.admin-table tr:last-child td { border-bottom: 0; }
 
+        /* Commandes en cartes empilées sur mobile — 10 colonnes en scroll
+           horizontal étaient inutilisables sur téléphone. */
+        @media (max-width: 760px) {
+            #tab-commandes .admin-table-wrap { overflow-x: visible; }
+            #tab-commandes table.admin-table thead { display: none; }
+            #tab-commandes table.admin-table, #tab-commandes table.admin-table tbody,
+            #tab-commandes table.admin-table tr, #tab-commandes table.admin-table td { display: block; width: 100%; box-sizing: border-box; }
+            #tab-commandes table.admin-table tr { margin-bottom: 14px; border: 1px solid rgba(26,22,20,.1); border-radius: 14px; padding: 4px 14px; }
+            #tab-commandes table.admin-table tr:last-child { margin-bottom: 0; }
+            #tab-commandes table.admin-table td { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 8px 0; }
+            #tab-commandes table.admin-table td::before { content: attr(data-label); flex-shrink: 0; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; opacity: .55; font-weight: 700; padding-top: 2px; }
+            #tab-commandes table.admin-table td > * { text-align: right; }
+        }
+
         /* Produits */
         .admin-prod-row { display: flex; align-items: center; gap: 14px; background: var(--white); border-radius: 14px; padding: 12px 16px; margin-bottom: 10px; }
         .admin-prod-thumb { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; background: linear-gradient(135deg,#ddd5c0,#c8c0a8); flex-shrink: 0; }
@@ -156,6 +170,7 @@
             <div class="admin-panel-head">
                 <div class="admin-filters">
                     <span class="admin-muted" id="commandesCount"></span>
+                    <input type="text" class="admin-field" id="rechercheCommande" placeholder="Nom, e-mail, téléphone…" style="width:200px">
                     <select class="admin-field" id="filtreStatut" style="width:auto">
                         <option value="">Tous les statuts</option>
                         <option value="Commande reçue">Reçue</option>
@@ -164,8 +179,11 @@
                         <option value="Expédié">Expédiée</option>
                         <option value="Annulée">Annulée</option>
                     </select>
+                    <label class="admin-muted" style="display:flex;align-items:center;gap:4px">Du <input type="date" class="admin-field" id="dateDebut" style="width:auto"></label>
+                    <label class="admin-muted" style="display:flex;align-items:center;gap:4px">au <input type="date" class="admin-field" id="dateFin" style="width:auto"></label>
                     <label class="admin-checkbox-row" style="margin-left:8px"><input type="checkbox" id="afficherArchivees"> Afficher les archivées</label>
                 </div>
+                <button type="button" class="btn btn-ghost sm" id="archiveAllBtn">Archiver les expédiées/annulées visibles</button>
                 <button type="button" class="btn btn-ghost sm" id="refreshCommandesBtn">Actualiser</button>
                 <button type="button" class="btn btn-ghost sm" id="exportCsvBtn">Exporter en CSV</button>
                 <button type="button" class="btn btn-ghost sm" id="exportXlsxBtn">Exporter en XLSX</button>
@@ -187,6 +205,15 @@
                 <table class="admin-table">
                     <thead><tr><th>Produit</th><th>Quantité</th><th></th></tr></thead>
                     <tbody id="stockBody"></tbody>
+                </table>
+            </div>
+
+            <p class="admin-section-label" style="margin-top:28px">Prévenez-moi du retour en stock</p>
+            <p class="admin-help">Demandes en attente — jusqu'ici visibles seulement dans le digest quotidien par e-mail. Clique "Traité" une fois la personne recontactée pour retirer la ligne.</p>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead><tr><th>Date</th><th>Produit</th><th>E-mail</th><th>Langue</th><th></th></tr></thead>
+                    <tbody id="interetsBody"></tbody>
                 </table>
             </div>
         </div>
@@ -312,7 +339,9 @@ async function tenterConnexion(cle, silencieux) {
         switchTab('dashboard');
     } else if (!silencieux) {
         effacerCle();
-        document.getElementById('loginError').hidden = false;
+        const err = document.getElementById('loginError');
+        err.textContent = rep.error === 'auth' ? 'Clé incorrecte.' : (rep.error || 'Connexion impossible.');
+        err.hidden = false;
     }
 }
 
@@ -439,14 +468,42 @@ async function enregistrerStatut(row, statut, suivi) {
     }
 }
 
+// Filtres partagés par renderCommandes() et le bouton d'archivage groupé —
+// statut, texte libre (nom/email/tél) et plage de dates. L'archivage
+// visible/masqué reste séparé (voir renderCommandes) car le bouton groupé
+// doit voir les commandes archivables même si elles sont actuellement masquées.
+function commandesFiltreesBase() {
+    const filtre = document.getElementById('filtreStatut').value;
+    const recherche = document.getElementById('rechercheCommande').value.trim().toLowerCase();
+    const dateDebut = document.getElementById('dateDebut').value;
+    const dateFin = document.getElementById('dateFin').value;
+    return commandesCache.filter(c => {
+        if (filtre && c.statut !== filtre) return false;
+        if (recherche) {
+            const hay = `${c.name} ${c.email} ${c.phone}`.toLowerCase();
+            if (!hay.includes(recherche)) return false;
+        }
+        if (dateDebut || dateFin) {
+            const d = c.date ? new Date(c.date) : null;
+            if (!d) return false;
+            if (dateDebut && d < new Date(dateDebut)) return false;
+            if (dateFin) {
+                const fin = new Date(dateFin);
+                fin.setHours(23, 59, 59, 999);
+                if (d > fin) return false;
+            }
+        }
+        return true;
+    });
+}
+
 function renderCommandes() {
     const el = document.getElementById('commandesBody');
-    const filtre = document.getElementById('filtreStatut').value;
     const afficherArchivees = document.getElementById('afficherArchivees').checked;
     const archivees = getArchivees();
-    let lignes = filtre ? commandesCache.filter(c => c.statut === filtre) : commandesCache;
-    lignes = lignes.filter(c => archivees.has(empreinteCommande(c)) === afficherArchivees);
-    const nbArchivees = commandesCache.filter(c => archivees.has(empreinteCommande(c))).length;
+    const base = commandesFiltreesBase();
+    let lignes = base.filter(c => archivees.has(empreinteCommande(c)) === afficherArchivees);
+    const nbArchivees = base.filter(c => archivees.has(empreinteCommande(c))).length;
     document.getElementById('commandesCount').textContent = lignes.length + ' / ' + commandesCache.length + ' commande(s)'
         + (nbArchivees ? ` (${nbArchivees} archivée(s)${afficherArchivees ? '' : ', masquée(s)'})` : '');
 
@@ -459,24 +516,24 @@ function renderCommandes() {
         const estArchivee = archivees.has(empreinteCommande(c));
         return `
         <tr class="${c.statut === 'Commande reçue' ? 'admin-row-new' : ''}">
-            <td>${c.date ? new Date(c.date).toLocaleDateString('fr-FR') : ''}</td>
-            <td>${escapeHTML(c.name)}<br><span class="admin-muted">${escapeHTML(c.email)}</span></td>
-            <td>${escapeHTML(c.phone) || '—'}${mailtoHref ? `<br><a class="btn btn-ghost sm" style="margin-top:4px;display:inline-block" href="${escapeHTML(mailtoHref)}">Contacter</a>` : ''}</td>
-            <td>${escapeHTML(c.address) || '—'}</td>
-            <td>${escapeHTML(c.items)}</td>
-            <td>${c.subtotal ? escapeHTML(c.subtotal) + ' €' : '—'}</td>
-            <td>${escapeHTML(c.lang)}</td>
-            <td>
+            <td data-label="Date">${c.date ? new Date(c.date).toLocaleDateString('fr-FR') : ''}</td>
+            <td data-label="Client">${escapeHTML(c.name)}<br><span class="admin-muted">${escapeHTML(c.email)}</span></td>
+            <td data-label="Contact">${escapeHTML(c.phone) || '—'}${mailtoHref ? `<br><a class="btn btn-ghost sm" style="margin-top:4px;display:inline-block" href="${escapeHTML(mailtoHref)}">Contacter</a>` : ''}</td>
+            <td data-label="Adresse">${escapeHTML(c.address) || '—'}</td>
+            <td data-label="Articles">${escapeHTML(c.items)}</td>
+            <td data-label="Montant">${c.subtotal ? escapeHTML(c.subtotal) + ' €' : '—'}</td>
+            <td data-label="Langue">${escapeHTML(c.lang)}</td>
+            <td data-label="Statut">
                 <select class="admin-field admin-select-statut" data-row="${c.row}">
                     ${STATUTS.map(s => `<option value="${s}" ${s === c.statut ? 'selected' : ''}>${s}</option>`).join('')}
                 </select>
             </td>
-            <td>${c.suivi ? escapeHTML(c.suivi) : `
+            <td data-label="Suivi">${c.suivi ? escapeHTML(c.suivi) : `
                 <div class="admin-suivi-input" data-row="${c.row}" style="display:${c.statut === 'Expédié' ? 'flex' : 'none'};gap:6px;align-items:center">
                     <input class="admin-field" style="width:110px" placeholder="N° suivi" data-suivi-input="${c.row}">
                     <button type="button" class="btn btn-ghost sm" data-suivi-confirm="${c.row}">OK</button>
                 </div>`}</td>
-            <td>
+            <td data-label="Actions">
                 ${estArchivee
                     ? `<button type="button" class="btn btn-ghost sm" data-unarchive-commande="${c.row}">Désarchiver</button>`
                     : (peutArchiver ? `<button type="button" class="btn btn-ghost sm" data-archive-commande="${c.row}">Archiver</button>` : '')}
@@ -546,8 +603,23 @@ function renderCommandes() {
 }
 
 document.getElementById('filtreStatut').addEventListener('change', renderCommandes);
+document.getElementById('rechercheCommande').addEventListener('input', renderCommandes);
+document.getElementById('dateDebut').addEventListener('change', renderCommandes);
+document.getElementById('dateFin').addEventListener('change', renderCommandes);
 document.getElementById('afficherArchivees').addEventListener('change', renderCommandes);
 document.getElementById('refreshCommandesBtn').addEventListener('click', chargerCommandes);
+
+document.getElementById('archiveAllBtn').addEventListener('click', () => {
+    const archivees = getArchivees();
+    let n = 0;
+    commandesFiltreesBase().forEach(c => {
+        const peutArchiver = c.statut === 'Expédié' || c.statut === 'Annulée';
+        if (peutArchiver && !archivees.has(empreinteCommande(c))) { archivees.add(empreinteCommande(c)); n++; }
+    });
+    saveArchivees(archivees);
+    renderCommandes();
+    toast(n ? `${n} commande(s) archivée(s).` : 'Rien à archiver parmi les commandes visibles.');
+});
 
 const COLONNES_COMMANDES = [
     { cle: 'date', libelle: 'Date' }, { cle: 'name', libelle: 'Nom' }, { cle: 'email', libelle: 'Email' },
@@ -589,8 +661,12 @@ document.getElementById('exportXlsxBtn').addEventListener('click', () => {
 
 async function chargerStock() {
     const el = document.getElementById('stockBody');
+    const elInterets = document.getElementById('interetsBody');
     el.innerHTML = '<tr><td colspan="3">Chargement…</td></tr>';
-    const [repProduits, repStock] = await Promise.all([api('adminListProduits'), api('adminListStock')]);
+    elInterets.innerHTML = '<tr><td colspan="5">Chargement…</td></tr>';
+    const [repProduits, repStock, repInterets] = await Promise.all([
+        api('adminListProduits'), api('adminListStock'), api('adminListInterets'),
+    ]);
     if (!repProduits.ok) { el.innerHTML = `<tr><td colspan="3">Erreur : ${escapeHTML(repProduits.error)}</td></tr>`; return; }
     produitsCache = repProduits.produits;
     if (repStock.ok) { stockParIdCache = {}; repStock.stock.forEach(s => { stockParIdCache[s.id] = s.qty; }); }
@@ -615,6 +691,28 @@ async function chargerStock() {
             const input = el.querySelector(`[data-stock-id="${id}"]`);
             const rep = await api('adminSetStock', { id, nom: p ? p.name : '', qty: input.value });
             if (rep.ok) toast('Stock mis à jour.'); else toast(rep.error, true);
+        });
+    });
+
+    renderInterets(repInterets.ok ? repInterets.interets : []);
+}
+
+function renderInterets(interets) {
+    const el = document.getElementById('interetsBody');
+    if (!interets.length) { el.innerHTML = '<tr><td colspan="5">Aucune demande en attente.</td></tr>'; return; }
+    el.innerHTML = interets.map(it => `
+        <tr>
+            <td>${it.date ? new Date(it.date).toLocaleDateString('fr-FR') : ''}</td>
+            <td>${escapeHTML(it.product) || '—'}</td>
+            <td>${escapeHTML(it.email)}</td>
+            <td>${escapeHTML(it.lang)}</td>
+            <td><button type="button" class="btn btn-ghost sm" data-delete-interet="${it.row}">Traité</button></td>
+        </tr>`).join('');
+    el.querySelectorAll('[data-delete-interet]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const row = +btn.dataset.deleteInteret;
+            const rep = await api('adminDeleteInteret', { row });
+            if (rep.ok) { toast('Demande marquée traitée.'); chargerStock(); } else { toast(rep.error, true); }
         });
     });
 }
@@ -643,23 +741,38 @@ function badgeRupture(p) {
     return p.inStock === false ? ' — marqué en rupture' : '';
 }
 
+// Flèches ↑↓ groupées par catégorie (voir deplacerProduit côté serveur, qui
+// saute les lignes d'autres catégories) : sans ce regroupement visuel, une
+// ligne "accessoire" intercalée entre deux "decks" rendait l'ordre affiché
+// difficile à lire par rapport à ce que fait réellement le clic.
+const CATEGORIE_LABELS = { deck: 'Decks', accessory: 'Accessoires', bundle: 'Bundles' };
+
 function renderProduitsListe() {
     const el = document.getElementById('produitsListe');
     if (!produitsCache.length) { el.innerHTML = '<p class="admin-muted">Aucun produit pour l\'instant.</p>'; return; }
-    el.innerHTML = produitsCache.map((p, i) => `
-        <div class="admin-prod-row">
-            <span class="admin-move-btns">
-                <button type="button" data-move="up" data-id="${p.id}" ${i === 0 ? 'disabled' : ''} aria-label="Monter">↑</button>
-                <button type="button" data-move="down" data-id="${p.id}" ${i === produitsCache.length - 1 ? 'disabled' : ''} aria-label="Descendre">↓</button>
-            </span>
-            <img src="${escapeHTML(p.img)}" alt="" class="admin-prod-thumb" onerror="this.style.visibility='hidden'">
-            <div class="admin-prod-info">
-                <strong>${escapeHTML(p.name)}</strong>
-                <span class="admin-muted">${escapeHTML(p.cat)} — ${p.price} €${badgeRupture(p)}</span>
-            </div>
-            <button type="button" class="btn btn-ghost sm" data-duplicate-produit="${p.id}">Dupliquer</button>
-            <button type="button" class="btn btn-ghost sm" data-edit-produit="${p.id}">Modifier</button>
-        </div>`).join('');
+
+    const cats = [];
+    produitsCache.forEach(p => { if (!cats.includes(p.cat)) cats.push(p.cat); });
+
+    el.innerHTML = cats.map(cat => {
+        const items = produitsCache.filter(p => p.cat === cat);
+        const lignes = items.map((p, iLocal) => `
+            <div class="admin-prod-row">
+                <span class="admin-move-btns">
+                    <button type="button" data-move="up" data-id="${p.id}" ${iLocal === 0 ? 'disabled' : ''} aria-label="Monter">↑</button>
+                    <button type="button" data-move="down" data-id="${p.id}" ${iLocal === items.length - 1 ? 'disabled' : ''} aria-label="Descendre">↓</button>
+                </span>
+                <img src="${escapeHTML(p.img)}" alt="" class="admin-prod-thumb" onerror="this.style.visibility='hidden'">
+                <div class="admin-prod-info">
+                    <strong>${escapeHTML(p.name)}</strong>
+                    <span class="admin-muted">${escapeHTML(p.cat)} — ${p.price} €${badgeRupture(p)}</span>
+                </div>
+                <button type="button" class="btn btn-ghost sm" data-duplicate-produit="${p.id}">Dupliquer</button>
+                <button type="button" class="btn btn-ghost sm" data-edit-produit="${p.id}">Modifier</button>
+            </div>`).join('');
+        return `<p class="admin-section-label">${escapeHTML(CATEGORIE_LABELS[cat] || cat || 'Sans catégorie')}</p>${lignes}`;
+    }).join('');
+
     el.querySelectorAll('[data-edit-produit]').forEach(b => b.addEventListener('click', () => ouvrirFormProduit(+b.dataset.editProduit)));
     el.querySelectorAll('[data-move]').forEach(b => b.addEventListener('click', async () => {
         const rep = await api('adminMoveProduit', { id: b.dataset.id, sens: b.dataset.move });
@@ -678,6 +791,8 @@ document.getElementById('nouveauProduitBtn').addEventListener('click', () => ouv
 
 let produitEnEdition = null;
 let imagesEnEdition = [];
+let formulaireModifie = false;
+document.getElementById('produitForm').addEventListener('input', () => { formulaireModifie = true; });
 
 const CHAMPS_TEXTE = ['name', 'name_en', 'tag', 'tag_en', 'format', 'format_en', 'weight', 'weight_en', 'delivery', 'delivery_en', 'glyph'];
 
@@ -708,12 +823,15 @@ function ouvrirFormProduit(id) {
     document.getElementById('produitModalTitle').textContent = id ? 'Modifier le produit' : 'Nouveau produit';
     document.getElementById('supprimerProduitBtn').style.display = id ? '' : 'none';
     document.getElementById('produitModal').classList.add('show');
+    formulaireModifie = false;
 }
 
-function fermerFormProduit() {
+function fermerFormProduit(forcer) {
+    if (!forcer && formulaireModifie && !confirm('Des modifications non enregistrées seront perdues. Fermer quand même ?')) return;
     document.getElementById('produitModal').classList.remove('show');
+    formulaireModifie = false;
 }
-document.getElementById('produitModalClose').addEventListener('click', fermerFormProduit);
+document.getElementById('produitModalClose').addEventListener('click', () => fermerFormProduit());
 document.getElementById('produitModal').addEventListener('click', (e) => { if (e.target.id === 'produitModal') fermerFormProduit(); });
 
 function renderImagesEditeur() {
@@ -732,12 +850,14 @@ function renderImagesEditeur() {
     }));
     el.querySelectorAll('[data-remove-img]').forEach(btn => btn.addEventListener('click', () => {
         imagesEnEdition.splice(+btn.dataset.removeImg, 1);
+        formulaireModifie = true;
         renderImagesEditeur();
     }));
 }
 
 document.getElementById('ajouterUrlBtn').addEventListener('click', () => {
     imagesEnEdition.push('');
+    formulaireModifie = true;
     renderImagesEditeur();
 });
 
@@ -761,6 +881,7 @@ document.getElementById('photoInput').addEventListener('change', async (e) => {
     const rep = await api('adminUploadPhoto', { filename: file.name, mimeType: file.type, data: base64 });
     if (rep.ok) {
         imagesEnEdition.push(rep.url);
+        formulaireModifie = true;
         renderImagesEditeur();
         toast('Photo ajoutée.');
     } else {
@@ -786,7 +907,7 @@ document.getElementById('produitForm').addEventListener('submit', async (e) => {
     btn.disabled = false;
     if (rep.ok) {
         toast('Produit enregistré.');
-        fermerFormProduit();
+        fermerFormProduit(true);
         chargerProduits();
     } else {
         toast(rep.error, true);
@@ -799,7 +920,7 @@ document.getElementById('supprimerProduitBtn').addEventListener('click', async (
     const rep = await api('adminDeleteProduit', { id: produitEnEdition.id });
     if (rep.ok) {
         toast('Produit supprimé.');
-        fermerFormProduit();
+        fermerFormProduit(true);
         chargerProduits();
     } else {
         toast(rep.error, true);
