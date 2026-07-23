@@ -149,6 +149,7 @@
             <button type="button" class="admin-tab-btn" data-tab="dashboard">Tableau de bord</button>
             <button type="button" class="admin-tab-btn" data-tab="commandes" style="position:relative">Commandes<span class="admin-tab-badge" id="badgeCommandes" hidden></span></button>
             <button type="button" class="admin-tab-btn" data-tab="stock">Stock</button>
+            <button type="button" class="admin-tab-btn" data-tab="emailing">Emailing</button>
             <button type="button" class="admin-tab-btn" data-tab="produits">Produits</button>
         </div>
 
@@ -215,6 +216,49 @@
                     <thead><tr><th>Date</th><th>Produit</th><th>E-mail</th><th>Langue</th><th></th></tr></thead>
                     <tbody id="interetsBody"></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- EMAILING -->
+        <div class="admin-tab-panel" id="tab-emailing">
+            <div class="admin-panel-head">
+                <div class="admin-filters">
+                    <label class="admin-muted" style="display:flex;align-items:center;gap:6px">Destinataires
+                        <select class="admin-field" id="emailingSource" style="width:auto">
+                            <option value="commandes">Clients (commandes)</option>
+                            <option value="interets">Intérêts stock (retour en stock)</option>
+                        </select>
+                    </label>
+                    <input type="text" class="admin-field" id="emailingRecherche" placeholder="Nom, e-mail…" style="width:200px">
+                    <span class="admin-muted" id="emailingCount"></span>
+                </div>
+                <button type="button" class="btn btn-ghost sm" id="refreshEmailingBtn">Actualiser</button>
+            </div>
+            <div class="admin-table-wrap" style="margin-bottom:20px">
+                <table class="admin-table">
+                    <thead><tr><th style="width:34px"><input type="checkbox" id="emailingToutCocher"></th><th>Nom</th><th>E-mail</th></tr></thead>
+                    <tbody id="emailingBody"></tbody>
+                </table>
+            </div>
+            <div class="admin-form-grid full">
+                <div class="admin-form-group"><label>Objet</label><input class="admin-field" id="emailingSujet" value="TarotLens — "></div>
+                <div class="admin-form-group"><label>Message</label><textarea class="admin-field" id="emailingCorps" style="min-height:280px">Bonjour,
+
+—
+
+[Votre message ici]
+
+—
+
+SEE YOU THERE!
+
+✦ TarotLens
+TarotLens129@gmail.com · @TarotLens</textarea></div>
+            </div>
+            <p class="admin-help">Ouvre votre client de messagerie (Mail, Outlook…) avec les destinataires cochés en copie cachée (Cci) — même message pour tout le monde, à vous de cliquer sur Envoyer une fois la fenêtre ouverte. Au-delà d'une cinquantaine de destinataires, certains clients mail tronquent le lien : mieux vaut faire plusieurs envois plus petits.</p>
+            <div class="admin-form-actions">
+                <span></span>
+                <button type="button" class="btn btn-orange" id="ouvrirEmailingBtn">Ouvrir dans le client mail</button>
             </div>
         </div>
 
@@ -377,6 +421,7 @@ function switchTab(name) {
     if (name === 'dashboard') chargerDashboard();
     if (name === 'commandes') chargerCommandes();
     if (name === 'stock') chargerStock();
+    if (name === 'emailing') chargerEmailing();
     if (name === 'produits') chargerProduits();
 }
 
@@ -726,6 +771,98 @@ function renderInterets(interets) {
         });
     });
 }
+
+/* ==================== Emailing ==================== */
+
+let emailingDestinataires = [];
+
+async function chargerEmailing() {
+    const source = document.getElementById('emailingSource').value;
+    const el = document.getElementById('emailingBody');
+    el.innerHTML = '<tr><td colspan="3">Chargement…</td></tr>';
+    if (source === 'commandes') {
+        const rep = await api('adminListCommandes');
+        if (!rep.ok) { el.innerHTML = `<tr><td colspan="3">Erreur : ${escapeHTML(rep.error)}</td></tr>`; return; }
+        commandesCache = rep.commandes;
+        majBadgeCommandes(commandesCache);
+        construireListeEmailing(rep.commandes.map(c => ({ name: c.name, email: c.email })));
+    } else {
+        const rep = await api('adminListInterets');
+        if (!rep.ok) { el.innerHTML = `<tr><td colspan="3">Erreur : ${escapeHTML(rep.error)}</td></tr>`; return; }
+        construireListeEmailing(rep.interets.map(it => ({ name: it.product || '', email: it.email })));
+    }
+}
+
+// Dédoublonne par e-mail (insensible à la casse) : un même client peut avoir
+// plusieurs commandes ou demandes, on ne veut pas lui écrire deux fois.
+function construireListeEmailing(bruts) {
+    const parEmail = new Map();
+    bruts.forEach(({ name, email }) => {
+        const e = (email || '').trim();
+        if (!e) return;
+        const cle = e.toLowerCase();
+        if (!parEmail.has(cle)) parEmail.set(cle, { name: name || '', email: e, checked: true });
+    });
+    emailingDestinataires = [...parEmail.values()];
+    renderEmailing();
+}
+
+function emailingFiltres() {
+    const recherche = document.getElementById('emailingRecherche').value.trim().toLowerCase();
+    if (!recherche) return emailingDestinataires;
+    return emailingDestinataires.filter(d => `${d.name} ${d.email}`.toLowerCase().includes(recherche));
+}
+
+function renderEmailing() {
+    const el = document.getElementById('emailingBody');
+    const lignes = emailingFiltres();
+    el.innerHTML = lignes.length ? lignes.map(d => `
+        <tr>
+            <td><input type="checkbox" data-emailing-check="${escapeHTML(d.email)}" ${d.checked ? 'checked' : ''}></td>
+            <td>${escapeHTML(d.name) || '—'}</td>
+            <td>${escapeHTML(d.email)}</td>
+        </tr>`).join('') : '<tr><td colspan="3">Aucun destinataire.</td></tr>';
+    el.querySelectorAll('[data-emailing-check]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const d = emailingDestinataires.find(x => x.email === cb.dataset.emailingCheck);
+            if (d) d.checked = cb.checked;
+            majEmailingCount();
+        });
+    });
+    majEmailingCount();
+}
+
+function majEmailingCount() {
+    const n = emailingDestinataires.filter(d => d.checked).length;
+    document.getElementById('emailingCount').textContent = n + ' sélectionné(s)';
+}
+
+document.getElementById('emailingSource').addEventListener('change', chargerEmailing);
+document.getElementById('emailingRecherche').addEventListener('input', renderEmailing);
+document.getElementById('refreshEmailingBtn').addEventListener('click', chargerEmailing);
+
+document.getElementById('emailingToutCocher').addEventListener('change', (e) => {
+    const visibles = new Set(emailingFiltres().map(d => d.email));
+    emailingDestinataires.forEach(d => { if (visibles.has(d.email)) d.checked = e.target.checked; });
+    renderEmailing();
+});
+
+document.getElementById('ouvrirEmailingBtn').addEventListener('click', () => {
+    const destinataires = emailingDestinataires.filter(d => d.checked).map(d => d.email);
+    if (!destinataires.length) { toast('Sélectionne au moins un destinataire.', true); return; }
+    const sujet = document.getElementById('emailingSujet').value.trim();
+    const corps = document.getElementById('emailingCorps').value;
+    // Destinataires uniquement en Cci (bcc) — jamais en "À"/"Cc" — pour qu'aucun
+    // client ne voie l'adresse des autres. "À" pointe vers TarotLens elle-même
+    // (plutôt que vide) : plus propre pour l'affichage et moins susceptible
+    // d'être marqué comme suspect par les filtres anti-spam.
+    const mailto = `mailto:TarotLens129@gmail.com?bcc=${encodeURIComponent(destinataires.join(','))}&subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+    if (mailto.length > 1800) {
+        toast(`Lien trop long pour ${destinataires.length} destinataires — réduis la sélection (par lots de 40-50).`, true);
+        return;
+    }
+    window.location.href = mailto;
+});
 
 /* ==================== Produits ==================== */
 
